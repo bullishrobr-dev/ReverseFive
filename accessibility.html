@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility Statement | Zero Lines</title>
+    <meta name="description" content="Zero Lines Accessibility Statement - Our commitment to making our website accessible to everyone.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .legal-content { padding: 8rem 0 4rem; }
+        .legal-content h1 { font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1rem; }
+        .legal-content h2 { font-family: var(--font-display); font-size: 1.375rem; margin: 2.5rem 0 1rem; color: var(--text-primary); }
+        .legal-content p, .legal-content li { color: var(--text-secondary); line-height: 1.7; margin-bottom: 1rem; }
+        .legal-content ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+        .legal-content a { color: var(--accent-turquoise); }
+        .legal-date { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.875rem; margin-bottom: 2rem; transition: color 0.3s; }
+        .back-link:hover { color: var(--accent-turquoise); }
+    </style>
+</head>
+<body>
+    <header id="header" class="header scrolled">
+        <div class="container header-content">
+            <a href="index.html" class="logo-link" aria-label="Zero Lines home">
+                <img src="assets/zerolines-logo.png" alt="Zero Lines logo" class="logo" width="140" height="28">
+            </a>
+            <nav class="nav" aria-label="Page sections">
+                <a href="index.html">Home</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="legal-content">
+        <div class="container" style="max-width: 800px;">
+            <a href="index.html" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Back to Home
+            </a>
+            <h1>Accessibility Statement</h1>
+            <p class="legal-date">Last updated: May 2026</p>
+
+            <p>Zero Lines is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards.</p>
+
+            <h2>Our Commitment</h2>
+            <p>We believe everyone should be able to access and enjoy our website. We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards.</p>
+
+            <h2>Accessibility Features</h2>
+            <ul>
+                <li><strong>Keyboard navigation:</strong> Our website can be navigated using a keyboard alone.</li>
+                <li><strong>Screen reader support:</strong> We use semantic HTML and ARIA labels to support screen readers.</li>
+                <li><strong>Colour contrast:</strong> Text and interactive elements meet or exceed WCAG contrast requirements.</li>
+                <li><strong>Resizable text:</strong> Text can be resized up to 200% without loss of content or functionality.</li>
+                <li><strong>Reduced motion:</strong> We respect your system's <code>prefers-reduced-motion</code> setting and disable animations accordingly.</li>
+                <li><strong>Dark & light themes:</strong> Choose the colour theme that works best for your vision needs.</li>
+            </ul>
+
+            <h2>Ongoing Efforts</h2>
+            <p>We regularly review our website to identify and fix accessibility issues. Our team receives training on accessible design practices, and we test our site with various assistive technologies.</p>
+
+            <h2>Third-Party Content</h2>
+            <p>While we strive to ensure accessibility across our entire site, some third-party content or integrations may not fully conform to our standards. We encourage these providers to meet accessibility guidelines and work with them where possible.</p>
+
+            <h2>Feedback & Assistance</h2>
+            <p>If you experience any difficulty accessing content on our website, or if you have suggestions on how we can improve accessibility, please contact us:</p>
+            <ul>
+                <li>Email: <a href="mailto:info@zerolines.com">info@zerolines.com</a></li>
+                <li>WhatsApp: +350 5400 5198</li>
+            </ul>
+            <p>We take your feedback seriously and will make every reasonable effort to address your concerns.</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border-top: none; margin-top: 0; padding-top: 1rem;">
+                <p class="footer-note">© 2026 Zero Lines. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -758,7 +758,7 @@ const translations = {
         checkout: 'Checkout',
         checkout_note: 'Secure payment via Stripe',
         reviews_heading: 'What Our Customers Say',
-        reviews_subtext: 'Real experiences from real people. Join over 3,000 satisfied customers who have made Yubari King part of their routine.',
+        reviews_subtext: 'Real experiences from real people. Join over 1,000 satisfied customers who have made Yubari King part of their routine.',
         reviews_write_btn: 'Write a Review',
         reviews_modal_title: 'Share Your Experience',
         reviews_modal_desc: 'Your feedback helps others discover Yubari King.',
