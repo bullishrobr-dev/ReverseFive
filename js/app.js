@@ -87,9 +87,10 @@ const hasLenis = () => lenis !== null;
 try {
     if (typeof Lenis !== 'undefined') {
         lenis = new Lenis({
-    duration: 1.2,
+    duration: 1.4,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
+    wheelMultiplier: 0.9,
 });
 
 function raf(time) {
@@ -110,6 +111,77 @@ if (lenis && typeof ScrollTrigger !== 'undefined') {
 } catch (e) {
     console.warn('Lenis init failed:', e);
 }
+
+// ============================================
+// CURSOR AMBIENT GLOW
+// ============================================
+(function initCursorGlow() {
+    const glow = document.getElementById('cursor-glow');
+    if (!glow || window.matchMedia('(pointer: coarse)').matches) return;
+
+    let mx = 0, my = 0, cx = 0, cy = 0;
+    let rafId = null;
+    let isActive = false;
+
+    document.addEventListener('mousemove', (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        if (!isActive) {
+            isActive = true;
+            glow.classList.add('active');
+        }
+    });
+
+    document.addEventListener('mouseleave', () => {
+        glow.classList.remove('active');
+        isActive = false;
+    });
+
+    function updateGlow() {
+        if (!isActive) { rafId = null; return; }
+        cx += (mx - cx) * 0.08;
+        cy += (my - cy) * 0.08;
+        glow.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
+        rafId = requestAnimationFrame(updateGlow);
+    }
+
+    document.addEventListener('mousemove', () => {
+        if (!rafId) rafId = requestAnimationFrame(updateGlow);
+    }, { once: false });
+})();
+
+// ============================================
+// MAGNETIC BUTTONS
+// ============================================
+(function initMagneticButtons() {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
+    const buttons = document.querySelectorAll('.btn-primary, .btn-secondary, .nav a, .footer-link');
+    const radius = 60;
+
+    buttons.forEach(btn => {
+        btn.classList.add('magnetic-btn');
+        let rafId = null;
+
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            const dist = Math.sqrt(x * x + y * y);
+            const strength = Math.max(0, 1 - dist / radius) * 0.35;
+
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                btn.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+            });
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            if (rafId) cancelAnimationFrame(rafId);
+            btn.style.transform = '';
+        });
+    });
+})();
 
 // ============================================
 // HEADER SCROLL BEHAVIOR
