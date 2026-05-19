@@ -10,17 +10,25 @@ let heroTl;
 
 // Loading screen handled by CSS animations
 
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-            loadingScreen.classList.add('hidden');
-            // Trigger hero animations after loading
-            if (heroTl) heroTl.play();
-            if (typeof animateCollage === 'function') animateCollage();
-        }
-    }, 1800);
-});
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
+        loadingScreen.classList.add('hidden');
+        // Trigger hero animations after loading
+        if (heroTl) heroTl.play();
+        if (typeof animateCollage === 'function') animateCollage();
+    }
+}
+
+// Hide after load event + delay, or immediately if already loaded
+if (document.readyState === 'complete') {
+    setTimeout(hideLoadingScreen, 1800);
+} else {
+    window.addEventListener('load', () => setTimeout(hideLoadingScreen, 1800));
+}
+
+// Safety fallback: never stay stuck longer than 5 seconds
+setTimeout(hideLoadingScreen, 5000);
 
 // ============================================
 // THEME TOGGLE
