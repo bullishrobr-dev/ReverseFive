@@ -1,0 +1,25 @@
+# macOS system files
+.DS_Store
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Screenshots and temp files (project-specific)
+audit-*.png
+final-*.png
+polish-*.png
+test-screenshot*.png
+index-before-rebuild.html
+index-original.html
+index-rebuild-backup.html

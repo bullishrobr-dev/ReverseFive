@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Zero Lines Promo Codes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #141414;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent-turquoise: #0ABAB5;
+            --accent-turquoise-light: #0ddbd6;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-medium: rgba(255, 255, 255, 0.1);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 500;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-turquoise);
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--accent-turquoise);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-box .label {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Form */
+        .form-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .form-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.9375rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent-turquoise);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-turquoise);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-turquoise-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .form-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .message {
+            font-size: 0.875rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(34, 197, 95, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 95, 0.2);
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Table */
+        .table-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .table-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .code-table th {
+            text-align: left;
+            padding: 0.875rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .code-table td {
+            padding: 1rem;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .code-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .code-table .code-cell {
+            font-family: monospace;
+            font-size: 1rem;
+            color: var(--accent-turquoise);
+            font-weight: 600;
+        }
+
+        .code-table .discount-cell {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .code-table .salesperson-cell {
+            color: var(--text-secondary);
+        }
+
+        .code-table .usage-cell {
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 640px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .code-table {
+                font-size: 0.8125rem;
+            }
+            .code-table th,
+            .code-table td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Promo Code Manager</h1>
+                <p>Create and manage discount codes for your sales team</p>
+            </div>
+            <a href="index.html" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Back to Site
+            </a>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="number" id="stat-total-codes">0</div>
+                <div class="label">Active Codes</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="stat-total-uses">0</div>
+                <div class="label">Total Uses</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="stat-total-revenue">£0</div>
+                <div class="label">Revenue Tracked</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Create New Promo Code</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Promo Code</label>
+                    <input type="text" id="code-input" placeholder="e.g. SARAH50">
+                </div>
+                <div class="form-group">
+                    <label>Discount Type</label>
+                    <select id="type-input">
+                        <option value="percent">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (£)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Discount Value</label>
+                    <input type="number" id="value-input" placeholder="e.g. 20" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Salesperson Name</label>
+                    <input type="text" id="salesperson-input" placeholder="e.g. Sarah Johnson">
+                </div>
+                <div class="form-group full">
+                    <label>Notes (optional)</label>
+                    <input type="text" id="notes-input" placeholder="Any additional info...">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" id="create-btn">Create Code</button>
+                <div class="message" id="form-message"></div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h2>Active Promo Codes</h2>
+            <div id="codes-list">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                    <p>No promo codes yet. Create one above.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load data
+        let promoCodes = JSON.parse(localStorage.getItem('yubariPromoCodes')) || {};
+        let promoUsage = JSON.parse(localStorage.getItem('yubariPromoUsage')) || {};
+
+        function saveCodes() {
+            localStorage.setItem('yubariPromoCodes', JSON.stringify(promoCodes));
+        }
+
+        function saveUsage() {
+            localStorage.setItem('yubariPromoUsage', JSON.stringify(promoUsage));
+        }
+
+        function showMessage(msg, type) {
+            const el = document.getElementById('form-message');
+            el.textContent = msg;
+            el.className = `message ${type}`;
+            setTimeout(() => { el.className = 'message'; }, 3000);
+        }
+
+        function updateStats() {
+            const codes = Object.keys(promoCodes);
+            let totalUses = 0;
+            let totalRevenue = 0;
+
+            codes.forEach(code => {
+                const usage = promoUsage[code] || { count: 0, revenue: 0 };
+                totalUses += usage.count;
+                totalRevenue += usage.revenue || 0;
+            });
+
+            document.getElementById('stat-total-codes').textContent = codes.length;
+            document.getElementById('stat-total-uses').textContent = totalUses;
+            document.getElementById('stat-total-revenue').textContent = `£${totalRevenue}`;
+        }
+
+        function renderCodes() {
+            const container = document.getElementById('codes-list');
+            const codes = Object.keys(promoCodes);
+
+            if (codes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        <p>No promo codes yet. Create one above.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table class="code-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Discount</th>
+                            <th>Salesperson</th>
+                            <th>Uses</th>
+                            <th>Revenue</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            codes.forEach(code => {
+                const promo = promoCodes[code];
+                const usage = promoUsage[code] || { count: 0, revenue: 0 };
+                const discountLabel = promo.type === 'percent' ? `${promo.value}% OFF` : `£${promo.value} OFF`;
+
+                html += `
+                    <tr>
+                        <td class="code-cell">${code}</td>
+                        <td class="discount-cell">${discountLabel}</td>
+                        <td class="salesperson-cell">${promo.salesperson || '-'}</td>
+                        <td class="usage-cell">${usage.count}</td>
+                        <td class="usage-cell">£${usage.revenue || 0}</td>
+                        <td>
+                            <button class="btn btn-danger delete-btn" data-code="${code}">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+
+            // Attach delete handlers
+            container.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const code = btn.dataset.code;
+                    if (confirm(`Delete promo code "${code}"?`)) {
+                        delete promoCodes[code];
+                        delete promoUsage[code];
+                        saveCodes();
+                        saveUsage();
+                        renderCodes();
+                        updateStats();
+                    }
+                });
+            });
+        }
+
+        document.getElementById('create-btn').addEventListener('click', () => {
+            const code = document.getElementById('code-input').value.trim().toUpperCase();
+            const type = document.getElementById('type-input').value;
+            const value = parseInt(document.getElementById('value-input').value);
+            const salesperson = document.getElementById('salesperson-input').value.trim();
+            const notes = document.getElementById('notes-input').value.trim();
+
+            if (!code) {
+                showMessage('Please enter a promo code', 'error');
+                return;
+            }
+
+            if (!value || value < 1) {
+                showMessage('Please enter a valid discount value', 'error');
+                return;
+            }
+
+            if (promoCodes[code]) {
+                showMessage('This code already exists', 'error');
+                return;
+            }
+
+            promoCodes[code] = {
+                type,
+                value,
+                salesperson: salesperson || 'Unknown',
+                notes,
+                created: new Date().toISOString(),
+            };
+
+            promoUsage[code] = { count: 0, revenue: 0 };
+
+            saveCodes();
+            saveUsage();
+            renderCodes();
+            updateStats();
+
+            // Clear form
+            document.getElementById('code-input').value = '';
+            document.getElementById('value-input').value = '';
+            document.getElementById('salesperson-input').value = '';
+            document.getElementById('notes-input').value = '';
+
+            showMessage(`Promo code "${code}" created successfully!`, 'success');
+        });
+
+        // Initialize
+        updateStats();
+        renderCodes();
+
+        console.log('🔐 Zero Lines Admin Panel Loaded');
+    </script>
+</body>
+</html>
