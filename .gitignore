@@ -23,3 +23,5 @@ test-screenshot*.png
 index-before-rebuild.html
 index-original.html
 index-rebuild-backup.html
+screenshot-*.png
+where-to-apply-*.png
