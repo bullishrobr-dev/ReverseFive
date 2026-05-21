@@ -4857,3 +4857,113 @@ function clearZoneHighlight() {
         item.style.opacity = '';
     });
 }
+
+
+/* ============================================
+   FOOTER YEAR
+   ============================================ */
+(function initFooterYear() {
+    var yearEl = document.getElementById('footer-year');
+    if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+    }
+})();
+
+/* ============================================
+   EXIT-INTENT EMAIL CAPTURE
+   ============================================ */
+(function initExitIntentPopup() {
+    var popup = document.getElementById('exit-popup');
+    var form = document.getElementById('exit-popup-form');
+    var input = document.getElementById('exit-popup-email');
+    var successMsg = document.getElementById('exit-popup-success');
+    var closeBtn = popup ? popup.querySelector('.exit-popup-close') : null;
+    var backdrop = popup ? popup.querySelector('.exit-popup-backdrop') : null;
+
+    if (!popup || !form) return;
+
+    // Don't show if user already subscribed this session
+    if (sessionStorage.getItem('exitPopupDismissed')) return;
+    if (sessionStorage.getItem('exitPopupSubscribed')) return;
+
+    var shown = false;
+    var COOLDOWN_MS = 30000; // Minimum 30s before popup can show
+    var pageLoadTime = Date.now();
+
+    function showPopup() {
+        if (shown) return;
+        if (Date.now() - pageLoadTime < COOLDOWN_MS) return;
+        shown = true;
+        popup.classList.add('active');
+        popup.setAttribute('aria-hidden', 'false');
+        if (input) input.focus();
+    }
+
+    function hidePopup() {
+        popup.classList.remove('active');
+        popup.setAttribute('aria-hidden', 'true');
+        sessionStorage.setItem('exitPopupDismissed', '1');
+    }
+
+    function handleSubscribe(e) {
+        e.preventDefault();
+        var email = input.value.trim();
+        if (!email || !input.validity.valid) return;
+
+        // Store email in localStorage (array of emails)
+        var emails = JSON.parse(localStorage.getItem('zeroLinesEmails') || '[]');
+        if (emails.indexOf(email) === -1) {
+            emails.push(email);
+            localStorage.setItem('zeroLinesEmails', JSON.stringify(emails));
+        }
+
+        sessionStorage.setItem('exitPopupSubscribed', '1');
+        form.style.display = 'none';
+        var disclaimer = popup.querySelector('.exit-popup-disclaimer');
+        if (disclaimer) disclaimer.style.display = 'none';
+        if (successMsg) successMsg.classList.add('visible');
+
+        // Auto-close after 3 seconds
+        setTimeout(function() {
+            hidePopup();
+        }, 3000);
+    }
+
+    // Desktop: mouse leaving viewport toward top
+    document.addEventListener('mouseout', function(e) {
+        if (e.clientY <= 0 && !shown) {
+            showPopup();
+        }
+    });
+
+    // Mobile: show after 45 seconds if scrolled at least 30%
+    var mobileTimer;
+    var mobileTriggered = false;
+    function checkMobileTrigger() {
+        if (mobileTriggered || shown) return;
+        var scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+        if (scrollPercent > 0.3) {
+            mobileTriggered = true;
+            showPopup();
+        }
+    }
+
+    if (window.matchMedia('(pointer: coarse)').matches) {
+        window.addEventListener('scroll', checkMobileTrigger, { passive: true });
+        mobileTimer = setTimeout(function() {
+            if (!shown) showPopup();
+        }, 45000);
+    }
+
+    // Close handlers
+    if (closeBtn) closeBtn.addEventListener('click', hidePopup);
+    if (backdrop) backdrop.addEventListener('click', hidePopup);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && popup.classList.contains('active')) {
+            hidePopup();
+        }
+    });
+
+    // Submit handler
+    form.addEventListener('submit', handleSubscribe);
+})();
