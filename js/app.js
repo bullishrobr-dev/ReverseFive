@@ -277,6 +277,7 @@ function animateCollage() {
     });
     
 }
+}
 
 // ============================================
 // PREMIUM SCROLL EXPERIENCE
