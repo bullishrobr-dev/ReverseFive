@@ -284,12 +284,22 @@ body {
     align-items: center;
     justify-content: center;
     transition: opacity 0.8s var(--transition-smooth), visibility 0.8s;
+    animation: loadingAutoHide 0.8s var(--transition-smooth) 5s forwards;
 }
 
 .loading-screen.hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    animation: none;
+}
+
+@keyframes loadingAutoHide {
+    to {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
 }
 
 .loading-inner {

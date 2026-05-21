@@ -37,6 +37,22 @@
         </div>
     </div>
 
+    <!-- Loading screen safety fallback -->
+    <script>
+        (function() {
+            var start = Date.now();
+            var interval = setInterval(function() {
+                var el = document.getElementById('loading-screen');
+                if (!el || el.classList.contains('hidden') || Date.now() - start > 8000) {
+                    clearInterval(interval);
+                    if (el && !el.classList.contains('hidden')) {
+                        el.classList.add('hidden');
+                    }
+                }
+            }, 500);
+        })();
+    </script>
+
     <!-- Gradient Orbs -->
     <div class="gradient-orbs" aria-hidden="true">
         <div class="orb orb-1"></div>
