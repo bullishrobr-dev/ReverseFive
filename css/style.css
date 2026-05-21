@@ -118,10 +118,14 @@ body[data-theme="light"] .guideline-panel,
 body[data-theme="light"] .comparison-card,
 body[data-theme="light"] .faq-item,
 body[data-theme="light"] .protocol-summary,
-body[data-theme="light"] .warning-card,
 body[data-theme="light"] .contact-link,
 body[data-theme="light"] .cart-empty {
     background: var(--bg-card);
+}
+
+body[data-theme="light"] .warning-card {
+    background: rgba(217, 119, 6, 0.05);
+    border-color: rgba(217, 119, 6, 0.18);
 }
 
 body[data-theme="light"] .feature-icon,
@@ -1911,13 +1915,7 @@ body[data-theme="light"] .stats-disclaimer-box {
 }
 
 .protocol-step::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: -2rem;
-    height: 1px;
-    background: linear-gradient(90deg, var(--accent-turquoise), transparent);
+    display: none;
 }
 
 .protocol-step:last-child::before {
@@ -1929,7 +1927,7 @@ body[data-theme="light"] .stats-disclaimer-box {
     font-size: 3rem;
     font-weight: 400;
     color: var(--accent-turquoise);
-    opacity: 0.3;
+    opacity: 0.85;
     line-height: 1;
     margin-bottom: 1rem;
 }
@@ -2076,8 +2074,8 @@ body[data-theme="light"] .stats-disclaimer-box {
 .warning-card {
     display: flex;
     gap: 1rem;
-    background: rgba(10, 186, 181, 0.05);
-    border: 1px solid rgba(10, 186, 181, 0.15);
+    background: rgba(217, 119, 6, 0.06);
+    border: 1px solid rgba(217, 119, 6, 0.2);
     border-radius: 12px;
     padding: 1.5rem;
     max-width: 700px;
@@ -2085,7 +2083,7 @@ body[data-theme="light"] .stats-disclaimer-box {
 }
 
 .warning-card svg {
-    color: var(--accent-turquoise);
+    color: #d97706;
     flex-shrink: 0;
     margin-top: 2px;
 }
@@ -2095,7 +2093,7 @@ body[data-theme="light"] .stats-disclaimer-box {
     font-size: 1.125rem;
     font-weight: 500;
     margin-bottom: 0.375rem;
-    color: var(--accent-turquoise);
+    color: #d97706;
 }
 
 .warning-card p {
@@ -2123,8 +2121,9 @@ body[data-theme="light"] .stats-disclaimer-box {
 }
 
 .comparison-card.highlight {
-    border-color: rgba(10, 186, 181, 0.2);
-    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(10, 186, 181, 0.03) 100%);
+    border-color: rgba(10, 186, 181, 0.55);
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(10, 186, 181, 0.14) 100%);
+    box-shadow: 0 8px 40px rgba(10, 186, 181, 0.18), 0 0 0 1px rgba(10, 186, 181, 0.15), inset 0 1px 0 rgba(10, 186, 181, 0.08);
 }
 
 .comparison-label {
@@ -2177,6 +2176,7 @@ body[data-theme="light"] .stats-disclaimer-box {
 
 .comparison-card.highlight li::before {
     background: var(--accent-turquoise);
+    box-shadow: 0 0 6px rgba(10, 186, 181, 0.5);
 }
 
 /* ============================================
@@ -4465,8 +4465,9 @@ body[data-theme="light"] .zone-item.active {
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent-turquoise), transparent);
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--accent-turquoise) 20%, var(--accent-turquoise) 80%, transparent 100%);
+    opacity: 0.85;
 }
 
 .comparison-label {
@@ -4659,6 +4660,12 @@ body[data-theme="light"] .review-card {
 
 body[data-theme="light"] .comparison-card {
     background: linear-gradient(145deg, var(--bg-card) 0%, rgba(255,255,255,0.6) 100%);
+}
+
+body[data-theme="light"] .comparison-card.highlight {
+    border-color: rgba(10, 186, 181, 0.6);
+    background: linear-gradient(145deg, var(--bg-card) 0%, rgba(10, 186, 181, 0.12) 100%);
+    box-shadow: 0 8px 40px rgba(10, 186, 181, 0.15), 0 0 0 1px rgba(10, 186, 181, 0.18), inset 0 1px 0 rgba(10, 186, 181, 0.1);
 }
 
 body[data-theme="light"] .stat-card {
@@ -6277,7 +6284,7 @@ body[data-theme="light"] #contact-form select {
     transform: translateY(-4px);
 }
 .comparison-card.highlight:hover {
-    box-shadow: 0 20px 40px -12px rgba(10, 186, 181, 0.15);
+    box-shadow: 0 20px 40px -12px rgba(10, 186, 181, 0.25), 0 0 0 1px rgba(10, 186, 181, 0.2), inset 0 1px 0 rgba(10, 186, 181, 0.1);
 }
 
 /* Review cards enhanced */
@@ -6489,10 +6496,10 @@ body[data-theme="light"] .loading-logo img {
 
 /* Light mode protocol fixes */
 body[data-theme="light"] .step-number {
-    color: var(--accent-turquoise);
-    background: linear-gradient(145deg, rgba(8,158,154,0.18) 0%, rgba(8,158,154,0.06) 100%);
-    border-color: rgba(8,158,154,0.35);
-    box-shadow: 0 4px 20px rgba(8,158,154,0.14), inset 0 1px 0 rgba(255,255,255,0.5);
+    color: #089e9a;
+    background: linear-gradient(145deg, rgba(8,158,154,0.22) 0%, rgba(8,158,154,0.08) 100%);
+    border-color: rgba(8,158,154,0.45);
+    box-shadow: 0 4px 20px rgba(8,158,154,0.18), inset 0 1px 0 rgba(255,255,255,0.5);
     font-weight: 500;
 }
 
