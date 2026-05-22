@@ -243,6 +243,10 @@ html {
     scroll-behavior: auto;
 }
 
+html, body {
+    overflow-x: hidden;
+}
+
 body {
     font-family: var(--font-body);
     font-size: 16px;
@@ -251,7 +255,6 @@ body {
     background-color: var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
 }
 
 /* Selection */
@@ -288,7 +291,6 @@ body {
     align-items: center;
     justify-content: center;
     transition: opacity 0.8s var(--transition-smooth), visibility 0.8s;
-    animation: loadingAutoHide 0.8s var(--transition-smooth) 5s forwards;
 }
 
 .loading-screen.hidden {
@@ -313,6 +315,8 @@ body {
     justify-content: center;
     gap: 2rem;
     min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
     padding: 2rem;
 }
 
@@ -509,9 +513,18 @@ body[data-theme="light"] .orb-4 {
     padding: 1.25rem 0;
     transition: all 0.4s var(--transition-smooth);
     border-bottom: 1px solid transparent;
-    background: rgba(10, 10, 10, 0.78);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(10, 10, 10, 0.95);
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* backdrop-filter only on desktop (fine pointer) to avoid iOS compositor bugs */
+@media (pointer: fine) {
+    .header {
+        background: rgba(10, 10, 10, 0.78);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
 }
 
 .header.scrolled {
@@ -1045,6 +1058,8 @@ body[data-theme="light"] .theme-icon-moon {
 .hero {
     position: relative;
     min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     padding: 7rem 0 3rem;
@@ -6558,6 +6573,7 @@ body[data-theme="light"] .protocol-step p {
 
 @media (pointer: coarse) {
     .cursor-glow { display: none; }
+    #hero-canvas { display: none !important; }
 }
 
 /* ============================================================

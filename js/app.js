@@ -30,6 +30,13 @@ if (document.readyState === 'complete') {
 // Safety fallback: never stay stuck longer than 5 seconds
 setTimeout(hideLoadingScreen, 5000);
 
+// Extra iOS safety: force hide when tab becomes visible (handles backgrounded tabs)
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        setTimeout(hideLoadingScreen, 500);
+    }
+});
+
 // ============================================
 // THEME TOGGLE
 // ============================================
@@ -101,13 +108,7 @@ try {
     wheelMultiplier: 0.9,
 });
 
-function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
-
-// Integrate with GSAP ScrollTrigger
+// Integrate with GSAP ScrollTrigger (use GSAP ticker only — no double RAF)
 if (lenis && typeof ScrollTrigger !== 'undefined') {
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => {
@@ -125,7 +126,10 @@ if (lenis && typeof ScrollTrigger !== 'undefined') {
 // ============================================
 (function initCursorGlow() {
     const glow = document.getElementById('cursor-glow');
-    if (!glow || window.matchMedia('(pointer: coarse)').matches) return;
+    if (!glow || window.matchMedia('(pointer: coarse)').matches) {
+        if (glow) glow.remove();
+        return;
+    }
 
     let mx = 0, my = 0, cx = 0, cy = 0;
     let rafId = null;
@@ -289,6 +293,15 @@ const PX_STAGGER = 0.12;
 
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
+
+    // Refresh ScrollTrigger on resize / orientation change (critical for iOS)
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            ScrollTrigger.refresh();
+        }, 250);
+    });
 
     // ── SCROLL PROGRESS BAR ──
     const progressBar = document.createElement('div');
@@ -489,9 +502,17 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 // CANVAS PARTICLE BACKGROUND
 // ============================================
 const canvas = document.getElementById('hero-canvas');
-const ctx = canvas.getContext('2d');
+
+// Disable on touch/mobile devices for performance
+if (canvas && window.matchMedia('(pointer: coarse)').matches) {
+    canvas.style.display = 'none';
+}
+
+const ctx = canvas ? canvas.getContext('2d') : null;
 let particles = [];
 let animationId;
+
+if (!canvas || !ctx) {
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -584,6 +605,7 @@ const canvasObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0 });
 
 canvasObserver.observe(canvas);
+}
 
 // ============================================
 // CART FUNCTIONALITY
