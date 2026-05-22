@@ -6982,3 +6982,312 @@ body[data-theme="light"] .footer-social:hover {
         animation: none;
     }
 }
+
+
+/* ============================================
+   MOBILE REDESIGN — Stamps, Horizontal Scroll, Compact Footer
+   ============================================ */
+
+/* Stamp row under hero */
+.stamp-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.stamp-img {
+    height: 48px;
+    width: auto;
+    opacity: 0.85;
+    transition: opacity 0.3s, transform 0.3s;
+    filter: grayscale(0.2);
+}
+
+.stamp-img:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+body[data-theme="light"] .stamp-img {
+    filter: grayscale(0.1);
+}
+
+/* Mobile stamp sizing */
+@media (max-width: 768px) {
+    .stamp-row {
+        gap: 0.625rem;
+        margin-top: 1.25rem;
+        padding: 0 0.5rem;
+    }
+    .stamp-img {
+        height: 38px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stamp-img {
+        height: 32px;
+    }
+}
+
+/* Hide falling collage photos on mobile */
+@media (max-width: 768px) {
+    .photo-collage {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   MOBILE HORIZONTAL SCROLL CAROUSELS
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Stats cards */
+    .stats-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 1.25rem 1.5rem;
+        margin: 0 -1.25rem;
+    }
+    .stats-grid::-webkit-scrollbar {
+        display: none;
+    }
+    .stats-grid .stat-card {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        min-width: 0;
+    }
+
+    /* Feature / benefit grids */
+    .feature-grid,
+    .benefits-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 1.25rem 1.5rem;
+        margin: 0 -1.25rem;
+    }
+    .feature-grid::-webkit-scrollbar,
+    .benefits-grid::-webkit-scrollbar {
+        display: none;
+    }
+    .feature-grid .feature-card,
+    .benefits-grid .benefit-item {
+        flex: 0 0 82%;
+        scroll-snap-align: start;
+        min-width: 0;
+    }
+
+    /* Protocol steps */
+    .protocol-steps {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 1.25rem 1.5rem;
+        margin: 0 -1.25rem;
+    }
+    .protocol-steps::-webkit-scrollbar {
+        display: none;
+    }
+    .protocol-steps .protocol-step {
+        flex: 0 0 80%;
+        scroll-snap-align: start;
+        min-width: 0;
+    }
+    /* Hide the horizontal connecting line on mobile swipe */
+    .protocol-steps::before {
+        display: none;
+    }
+
+    /* Guidelines Do/Avoid panels */
+    .guidelines-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 1.25rem 1.5rem;
+        margin: 0 -1.25rem;
+    }
+    .guidelines-grid::-webkit-scrollbar {
+        display: none;
+    }
+    .guidelines-grid .guideline-panel {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        min-width: 0;
+    }
+
+    /* Comparison cards */
+    .comparison-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 1.25rem 1.5rem;
+        margin: 0 -1.25rem;
+    }
+    .comparison-grid::-webkit-scrollbar {
+        display: none;
+    }
+    .comparison-grid .comparison-card {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        min-width: 0;
+    }
+
+    /* FAQ items */
+    .faq-list {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 1.25rem 1.5rem;
+        margin: 0 -1.25rem;
+    }
+    .faq-list::-webkit-scrollbar {
+        display: none;
+    }
+    .faq-list .faq-item {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        min-width: 0;
+    }
+
+    /* Reviews */
+    .reviews-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 1.25rem 1.5rem;
+        margin: 0 -1.25rem;
+    }
+    .reviews-grid::-webkit-scrollbar {
+        display: none;
+    }
+    .reviews-grid .review-card {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        min-width: 0;
+    }
+}
+
+/* ============================================
+   COMPACT MOBILE FOOTER
+   ============================================ */
+
+@media (max-width: 768px) {
+    .footer {
+        padding: 2.5rem 0 1.5rem;
+    }
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    .footer-brand {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+    .footer-brand p {
+        max-width: 100%;
+    }
+    .footer-links h4 {
+        font-size: 0.6875rem;
+        margin-bottom: 0.75rem;
+    }
+    .footer-links a {
+        font-size: 0.8125rem;
+        padding: 0.15rem 0;
+    }
+    .footer-socials {
+        margin-top: 0.5rem;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+        padding-top: 1.25rem;
+        margin-top: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+    .footer {
+        padding: 2rem 0 1.25rem;
+    }
+}
+
+
+/* ============================================
+   MOBILE HORIZONTAL SCROLL — Ingredient List
+   ============================================ */
+
+@media (max-width: 768px) {
+    .ingredient-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 1rem;
+        padding: 0 0 1rem;
+        margin: 0 -0.5rem;
+    }
+    .ingredient-list::-webkit-scrollbar {
+        display: none;
+    }
+    .ingredient-list .ingredient-card {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        min-width: 0;
+        margin-bottom: 0;
+    }
+}
+
+/* Stamp pill background for better blending */
+.stamp-row {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 0.75rem 1rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-scrolling: touch;
+}
+
+body[data-theme="light"] .stamp-row {
+    background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.01) 100%);
+    border-color: rgba(0,0,0,0.06);
+}
+
+@media (max-width: 768px) {
+    .stamp-row {
+        padding: 0.625rem 0.75rem;
+        border-radius: 12px;
+    }
+}
