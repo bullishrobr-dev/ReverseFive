@@ -1496,6 +1496,69 @@ body[data-theme="light"] .photo-item {
     color: var(--accent-turquoise);
 }
 
+/* Hero Stamp Bar — certifications visible immediately */
+.hero-stamp-bar {
+    margin-top: 3rem;
+    width: 100%;
+}
+
+.hero-stamp-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(10, 186, 181, 0.15), transparent);
+    margin-bottom: 1.5rem;
+}
+
+.hero-stamp-track {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.hero-stamp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.65;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.hero-stamp:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.hero-stamp img {
+    height: 36px;
+    width: auto;
+    display: block;
+    filter: grayscale(0.3);
+    transition: filter 0.3s;
+}
+
+.hero-stamp:hover img {
+    filter: grayscale(0);
+}
+
+.hero-stamp span {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+body[data-theme="light"] .hero-stamp {
+    opacity: 0.55;
+}
+
+body[data-theme="light"] .hero-stamp:hover {
+    opacity: 0.9;
+}
+
 /* Scroll Indicator */
 .scroll-indicator {
     position: absolute;
@@ -2755,6 +2818,24 @@ body[data-theme="light"] .stats-disclaimer-box {
     .loading-logo img {
         height: 48px;
     }
+    
+    /* Hero stamp bar mobile */
+    .hero-stamp-bar {
+        margin-top: 2rem;
+    }
+    
+    .hero-stamp-track {
+        gap: 1.25rem;
+    }
+    
+    .hero-stamp img {
+        height: 30px;
+    }
+    
+    .hero-stamp span {
+        font-size: 0.625rem;
+        letter-spacing: 0.04em;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2804,6 +2885,18 @@ body[data-theme="light"] .stats-disclaimer-box {
     .product-glow {
         width: 280px;
         height: 280px;
+    }
+    
+    .hero-stamp-track {
+        gap: 0.875rem;
+    }
+    
+    .hero-stamp img {
+        height: 26px;
+    }
+    
+    .hero-stamp span {
+        font-size: 0.5625rem;
     }
     
     .photo-grid {
