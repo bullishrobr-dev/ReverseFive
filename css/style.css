@@ -1133,6 +1133,52 @@ body[data-theme="light"] .theme-icon-moon {
     margin-bottom: 1rem;
 }
 
+.hero-secondary-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 1.25rem;
+    transition: color 0.3s;
+}
+
+.hero-secondary-cta:hover {
+    color: var(--accent-turquoise);
+}
+
+.hero-arrow {
+    transition: transform 0.3s;
+}
+
+.hero-secondary-cta:hover .hero-arrow {
+    transform: translateX(3px);
+}
+
+.hero-guarantee {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.03) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 100px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--accent-gold);
+}
+
+.hero-guarantee svg {
+    color: var(--accent-gold);
+    flex-shrink: 0;
+}
+
+body[data-theme="light"] .hero-guarantee {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.06) 0%, rgba(212, 175, 55, 0.02) 100%);
+    border-color: rgba(212, 175, 55, 0.2);
+}
+
 /* Buttons */
 .btn-primary {
     display: inline-flex;
@@ -1252,6 +1298,24 @@ body[data-theme="light"] .theme-icon-moon {
     background: radial-gradient(circle, rgba(10, 186, 181, 0.15) 0%, rgba(10, 186, 181, 0.05) 40%, transparent 70%);
     pointer-events: none;
     z-index: 1;
+}
+
+/* Frosted-glass product card — grounds the product visually */
+.product-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 420px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 24px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+    z-index: 0;
 }
 
 /* Orbital ring — scientific feel around product */
@@ -1519,10 +1583,9 @@ body[data-theme="light"] .photo-item {
 
 .hero-stamp {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    opacity: 0.65;
+    justify-content: center;
+    opacity: 0.6;
     transition: opacity 0.3s, transform 0.3s;
 }
 
@@ -1532,23 +1595,15 @@ body[data-theme="light"] .photo-item {
 }
 
 .hero-stamp img {
-    height: 36px;
+    height: 42px;
     width: auto;
     display: block;
-    filter: grayscale(0.3);
+    filter: grayscale(0.25);
     transition: filter 0.3s;
 }
 
 .hero-stamp:hover img {
     filter: grayscale(0);
-}
-
-.hero-stamp span {
-    font-size: 0.6875rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
 }
 
 body[data-theme="light"] .hero-stamp {
@@ -2680,6 +2735,20 @@ body[data-theme="light"] .stats-disclaimer-box {
         display: none;
     }
     
+    .product-card {
+        width: 260px;
+        height: 340px;
+    }
+    
+    .hero-secondary-cta {
+        font-size: 0.8125rem;
+    }
+    
+    .hero-guarantee {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.875rem;
+    }
+    
     .feature-grid,
     .stats-grid,
     .protocol-timeline,
@@ -2825,16 +2894,11 @@ body[data-theme="light"] .stats-disclaimer-box {
     }
     
     .hero-stamp-track {
-        gap: 1.25rem;
+        gap: 1.5rem;
     }
     
     .hero-stamp img {
-        height: 30px;
-    }
-    
-    .hero-stamp span {
-        font-size: 0.625rem;
-        letter-spacing: 0.04em;
+        height: 36px;
     }
 }
 
@@ -2887,16 +2951,35 @@ body[data-theme="light"] .stats-disclaimer-box {
         height: 280px;
     }
     
+    .product-card {
+        display: none;
+    }
+    
+    .orbital-ring,
+    .orbital-ring-2 {
+        display: none;
+    }
+    
+    .product-image {
+        max-width: 200px;
+    }
+    
+    .hero-secondary-cta {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .hero-guarantee {
+        justify-content: center;
+        width: 100%;
+    }
+    
     .hero-stamp-track {
-        gap: 0.875rem;
+        gap: 1.25rem;
     }
     
     .hero-stamp img {
-        height: 26px;
-    }
-    
-    .hero-stamp span {
-        font-size: 0.5625rem;
+        height: 30px;
     }
     
     .photo-grid {
