@@ -14,8 +14,8 @@
     --text-secondary: #a0a0a0;
     --text-muted: #666666;
     --accent-turquoise: #0ABAB5;
-    --accent-gold: #0ABAB5;
-    --accent-gold-light: #0ddbd6;
+    --accent-gold: #D4AF37;
+    --accent-gold-light: #E8C84B;
     --border-subtle: rgba(255, 255, 255, 0.06);
     --border-medium: rgba(255, 255, 255, 0.1);
     --cursor-color: var(--accent-turquoise);
@@ -54,8 +54,8 @@ body[data-theme="light"] {
     --text-secondary: #5a5a5a;
     --text-muted: #999999;
     --accent-turquoise: #089e9a;
-    --accent-gold: #089e9a;
-    --accent-gold-light: #0ABAB5;
+    --accent-gold: #B8960C;
+    --accent-gold-light: #D4AF37;
     --border-subtle: rgba(0, 0, 0, 0.06);
     --border-medium: rgba(0, 0, 0, 0.1);
     --cursor-color: #089e9a;
@@ -1085,7 +1085,7 @@ body[data-theme="light"] .theme-icon-moon {
 }
 
 .eyebrow {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -1177,6 +1177,21 @@ body[data-theme="light"] .theme-icon-moon {
 body[data-theme="light"] .hero-guarantee {
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.06) 0%, rgba(212, 175, 55, 0.02) 100%);
     border-color: rgba(212, 175, 55, 0.2);
+}
+
+.hero-price-context {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+.price-dot {
+    color: var(--accent-gold);
+    opacity: 0.5;
 }
 
 /* Buttons */
@@ -1608,7 +1623,7 @@ body[data-theme="light"] .photo-item {
 }
 
 .hero-stamp span {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -2286,8 +2301,8 @@ body[data-theme="light"] .stats-disclaimer-box {
 
 .comparison-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
 }
 
 .comparison-card {
@@ -7414,41 +7429,32 @@ body[data-theme="light"] .stamp-img {
 
     /* Comparison cards */
     .comparison-grid {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
+        display: grid;
+        grid-template-columns: 1fr;
         gap: 1rem;
-        padding: 0 1.25rem 1.5rem;
-        margin: 0 -1.25rem;
-    }
-    .comparison-grid::-webkit-scrollbar {
-        display: none;
+        padding: 0;
+        margin: 0;
+        overflow-x: visible;
     }
     .comparison-grid .comparison-card {
-        flex: 0 0 85%;
-        scroll-snap-align: start;
+        flex: none;
+        scroll-snap-align: none;
         min-width: 0;
     }
 
     /* FAQ items */
     .faq-list {
         display: flex;
+        flex-direction: column;
         flex-wrap: nowrap;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: 1rem;
-        padding: 0 1.25rem 1.5rem;
-        margin: 0 -1.25rem;
-    }
-    .faq-list::-webkit-scrollbar {
-        display: none;
+        overflow-x: visible;
+        gap: 0.75rem;
+        padding: 0;
+        margin: 0;
     }
     .faq-list .faq-item {
-        flex: 0 0 85%;
-        scroll-snap-align: start;
+        flex: none;
+        scroll-snap-align: none;
         min-width: 0;
     }
 
