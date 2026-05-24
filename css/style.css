@@ -2783,8 +2783,8 @@ body[data-theme="light"] .stats-disclaimer-box {
     .two-col,
     .guidelines-grid,
     .comparison-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
     }
 }
 
@@ -7342,21 +7342,19 @@ body[data-theme="light"] .stamp-img {
 @media (max-width: 768px) {
     /* Stats cards */
     .stats-grid {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
+        display: grid;
+        grid-template-columns: 1fr;
         gap: 1rem;
-        padding: 0 1.25rem 1.5rem;
-        margin: 0 -1.25rem;
+        padding: 0;
+        margin: 2rem 0 0;
+        overflow-x: visible;
     }
-    .stats-grid::-webkit-scrollbar {
-        display: none;
+    .mobile-gallery {
+        margin-bottom: 0.5rem;
     }
     .stats-grid .stat-card {
-        flex: 0 0 85%;
-        scroll-snap-align: start;
+        flex: none;
+        scroll-snap-align: none;
         min-width: 0;
     }
 
@@ -7800,6 +7798,7 @@ body[data-theme="light"] .card-stamps {
 #results-stats .stats-disclaimer-box {
     padding: 1rem 1.25rem;
     margin-top: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 #results-stats .stats-disclaimer-box p {
