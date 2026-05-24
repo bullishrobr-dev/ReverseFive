@@ -1583,9 +1583,10 @@ body[data-theme="light"] .photo-item {
 
 .hero-stamp {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    opacity: 0.6;
+    gap: 0.5rem;
+    opacity: 0.65;
     transition: opacity 0.3s, transform 0.3s;
 }
 
@@ -1595,15 +1596,23 @@ body[data-theme="light"] .photo-item {
 }
 
 .hero-stamp img {
-    height: 42px;
+    height: 38px;
     width: auto;
     display: block;
-    filter: grayscale(0.25);
+    filter: grayscale(0.3);
     transition: filter 0.3s;
 }
 
 .hero-stamp:hover img {
     filter: grayscale(0);
+}
+
+.hero-stamp span {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
 }
 
 body[data-theme="light"] .hero-stamp {
@@ -2894,11 +2903,16 @@ body[data-theme="light"] .stats-disclaimer-box {
     }
     
     .hero-stamp-track {
-        gap: 1.5rem;
+        gap: 1.25rem;
     }
     
     .hero-stamp img {
-        height: 36px;
+        height: 34px;
+    }
+    
+    .hero-stamp span {
+        font-size: 0.625rem;
+        letter-spacing: 0.04em;
     }
 }
 
@@ -2975,11 +2989,16 @@ body[data-theme="light"] .stats-disclaimer-box {
     }
     
     .hero-stamp-track {
-        gap: 1.25rem;
+        gap: 0.875rem;
     }
     
     .hero-stamp img {
-        height: 30px;
+        height: 28px;
+    }
+    
+    .hero-stamp span {
+        font-size: 0.5625rem;
+        letter-spacing: 0.04em;
     }
     
     .photo-grid {
