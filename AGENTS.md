@@ -11,7 +11,7 @@
 - **Target market:** International (16 languages)
 - **Price point:** Premium (£300 GBP)
 - **Brand identity:** Dark, luxurious, medical-aesthetic feel
-- **Primary domain:** `zerolines.com` (Gibraltar-based)
+- **Primary domain:** `zerolines.life` (Gibraltar-based)
 
 ---
 
@@ -190,5 +190,5 @@ wrangler deploy
 ## Contact
 
 - **Owner:** bullishrobr-dev (GitHub)
-- **Brand:** Zero Lines — info@zerolines.com — +350 5400 5198
+- **Brand:** Zero Lines — info@zerolines.life — +350 5400 5198
 - **Repo:** https://github.com/bullishrobr-dev/YubariKing.git
