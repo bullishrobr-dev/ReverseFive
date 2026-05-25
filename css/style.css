@@ -2741,8 +2741,13 @@ body[data-theme="light"] .stats-disclaimer-box {
     .stats-grid,
     .protocol-timeline,
     .summary-grid,
-    .benefits-grid {
+    .benefits-grid,
+    .two-col {
         grid-template-columns: 1fr;
+    }
+    
+    .two-col {
+        gap: 2rem;
     }
     
     .section-header {
@@ -7401,28 +7406,19 @@ body[data-theme="light"] .stamp-img {
 
 
 /* ============================================
-   MOBILE HORIZONTAL SCROLL — Ingredient List
+   MOBILE — Ingredient List (vertical stack)
    ============================================ */
 
 @media (max-width: 768px) {
     .ingredient-list {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: 1rem;
-        padding: 0 0 1rem;
-        margin: 0 -0.5rem;
-    }
-    .ingredient-list::-webkit-scrollbar {
-        display: none;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0;
+        margin: 0;
     }
     .ingredient-list .ingredient-card {
-        flex: 0 0 85%;
-        scroll-snap-align: start;
-        min-width: 0;
+        flex: none;
         margin-bottom: 0;
     }
 }
