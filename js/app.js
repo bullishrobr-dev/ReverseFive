@@ -41,7 +41,7 @@ document.addEventListener('visibilitychange', function() {
 // THEME TOGGLE
 // ============================================
 const themeToggle = document.getElementById('theme-toggle');
-const savedTheme = localStorage.getItem('yubariTheme') || 'dark';
+const savedTheme = localStorage.getItem('yubariTheme') || 'light';
 
 function setTheme(theme) {
     document.body.setAttribute('data-theme', theme);
