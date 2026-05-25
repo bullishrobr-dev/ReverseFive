@@ -137,9 +137,7 @@ body[data-theme="light"] .photo-item {
     background: var(--bg-tertiary);
 }
 
-body[data-theme="light"] .scroll-line {
-    background: linear-gradient(to bottom, var(--accent-turquoise), transparent);
-}
+
 
 body[data-theme="light"] .btn-secondary {
     border-color: var(--border-medium);
@@ -1333,60 +1331,7 @@ body[data-theme="light"] .hero-guarantee {
     z-index: 0;
 }
 
-/* Orbital ring — scientific feel around product */
-.orbital-ring {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 320px;
-    height: 320px;
-    border: 1px solid rgba(10, 186, 181, 0.12);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1;
-    animation: orbitRotate 20s linear infinite;
-}
 
-.orbital-ring::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
-    background: var(--accent-turquoise);
-    border-radius: 50%;
-    box-shadow: 0 0 12px rgba(10, 186, 181, 0.6);
-}
-
-.orbital-ring-2 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(60deg);
-    width: 380px;
-    height: 380px;
-    border: 1px solid rgba(10, 186, 181, 0.08);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1;
-    animation: orbitRotate 28s linear infinite reverse;
-}
-
-.orbital-ring-2::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: rgba(10, 186, 181, 0.6);
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(10, 186, 181, 0.4);
-}
 
 @keyframes orbitRotate {
     from { transform: translate(-50%, -50%) rotate(0deg); }
@@ -1451,6 +1396,7 @@ body[data-theme="light"] .hero-guarantee {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
+    margin-bottom: 3rem;
 }
 
 .photo-item {
@@ -1638,29 +1584,7 @@ body[data-theme="light"] .hero-stamp:hover {
     opacity: 0.9;
 }
 
-/* Scroll Indicator */
-.scroll-indicator {
-    position: absolute;
-    bottom: 3rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-}
 
-.scroll-line {
-    width: 1px;
-    height: 60px;
-    background: linear-gradient(to bottom, var(--accent-turquoise), transparent);
-    animation: scrollPulse 2s ease-in-out infinite;
-}
-
-@keyframes scrollPulse {
-    0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
-    50% { opacity: 1; transform: scaleY(1); }
-}
 
 /* ============================================
    SECTIONS
@@ -2745,16 +2669,6 @@ body[data-theme="light"] .stats-disclaimer-box {
         height: 350px;
     }
     
-    .orbital-ring {
-        width: 260px;
-        height: 260px;
-    }
-    
-    .orbital-ring-2 {
-        width: 300px;
-        height: 300px;
-    }
-    
     .hero-particle {
         display: none;
     }
@@ -2965,27 +2879,12 @@ body[data-theme="light"] .stats-disclaimer-box {
         max-width: 220px;
     }
     
-    .orbital-ring {
-        width: 220px;
-        height: 220px;
-    }
-    
-    .orbital-ring-2 {
-        width: 260px;
-        height: 260px;
-    }
-    
     .product-glow {
         width: 280px;
         height: 280px;
     }
     
     .product-card {
-        display: none;
-    }
-    
-    .orbital-ring,
-    .orbital-ring-2 {
         display: none;
     }
     
@@ -3752,10 +3651,6 @@ html[dir="rtl"] .newsletter-content {
         animation: none !important;
     }
     
-    .scroll-line {
-        animation: none !important;
-    }
-    
     .loading-screen {
         display: none !important;
     }
@@ -4301,17 +4196,7 @@ body[data-theme="light"] .zone-item.active {
     position: relative;
 }
 
-.protocol-steps::before {
-    content: '';
-    position: absolute;
-    top: 2.25rem;
-    left: 3rem;
-    right: 3rem;
-    height: 1px;
-    background: linear-gradient(90deg, var(--accent-turquoise) 0%, rgba(10,186,181,0.3) 25%, rgba(10,186,181,0.3) 75%, var(--accent-turquoise) 100%);
-    z-index: 0;
-    opacity: 0.4;
-}
+
 
 .protocol-step {
     position: relative;
@@ -4863,10 +4748,6 @@ body[data-theme="light"] .zone-item.active {
 @media (max-width: 1024px) {
     .protocol-steps {
         grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .protocol-steps::before {
-        display: none;
     }
     
     .footer-grid {
@@ -6818,10 +6699,7 @@ body[data-theme="light"] .step-number {
     font-weight: 500;
 }
 
-body[data-theme="light"] .protocol-steps::before {
-    opacity: 0.55;
-    background: linear-gradient(90deg, var(--accent-turquoise) 0%, rgba(8,158,154,0.5) 25%, rgba(8,158,154,0.5) 75%, var(--accent-turquoise) 100%);
-}
+
 
 body[data-theme="light"] .protocol-step h4 {
     color: var(--text-primary);
@@ -7346,11 +7224,11 @@ body[data-theme="light"] .stamp-img {
         grid-template-columns: 1fr;
         gap: 1rem;
         padding: 0;
-        margin: 2rem 0 0;
+        margin: 2rem 0;
         overflow-x: visible;
     }
     .mobile-gallery {
-        margin-bottom: 0.5rem;
+        margin-bottom: 2.5rem;
     }
     .stats-grid .stat-card {
         flex: none;
@@ -7400,11 +7278,6 @@ body[data-theme="light"] .stamp-img {
         scroll-snap-align: start;
         min-width: 0;
     }
-    /* Hide the horizontal connecting line on mobile swipe */
-    .protocol-steps::before {
-        display: none;
-    }
-
     /* Guidelines Do/Avoid panels */
     .guidelines-grid {
         display: flex;
