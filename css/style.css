@@ -8283,3 +8283,101 @@ body[data-theme="light"] .before-after-item {
     width: 14px;
     height: 14px;
 }
+
+
+/* ============================================
+   PHILOSOPHY CARDS
+   ============================================ */
+
+.philosophy-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.philosophy-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 2.25rem;
+    transition: all 0.4s var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.philosophy-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-turquoise), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.philosophy-card:hover {
+    border-color: rgba(10, 186, 181, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 48px -12px rgba(10, 186, 181, 0.08);
+}
+
+.philosophy-card:hover::before {
+    opacity: 1;
+}
+
+.philosophy-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(10, 186, 181, 0.08);
+    border: 1px solid rgba(10, 186, 181, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: var(--accent-turquoise);
+}
+
+.philosophy-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+}
+
+.philosophy-card p {
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+body[data-theme="light"] .philosophy-card {
+    background: #ffffff;
+    border-color: var(--border-medium);
+}
+
+body[data-theme="light"] .philosophy-icon {
+    background: rgba(10, 186, 181, 0.06);
+    border-color: rgba(10, 186, 181, 0.12);
+}
+
+@media (max-width: 1024px) {
+    .philosophy-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .philosophy-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .philosophy-card {
+        padding: 1.75rem;
+    }
+}
