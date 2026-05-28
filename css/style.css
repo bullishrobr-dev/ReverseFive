@@ -1129,6 +1129,7 @@ body[data-theme="light"] .theme-icon-moon {
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: 1.75rem;
     margin-bottom: 1rem;
 }
 
