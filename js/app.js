@@ -5098,14 +5098,18 @@ document.querySelectorAll('.photo-item').forEach(item => {
     let showingEdited = true;
 
     item.addEventListener('click', () => {
-        if (showingEdited) {
-            img.src = img.dataset.original;
-            overlay.textContent = getTranslation('view_edited') || 'View Edited';
-        } else {
-            img.src = img.dataset.edited;
-            overlay.textContent = getTranslation('view_original') || 'View Original';
-        }
-        showingEdited = !showingEdited;
+        item.classList.add('switching');
+        setTimeout(() => {
+            if (showingEdited) {
+                img.src = img.dataset.original;
+                overlay.textContent = getTranslation('view_edited') || 'View Edited';
+            } else {
+                img.src = img.dataset.edited;
+                overlay.textContent = getTranslation('view_original') || 'View Original';
+            }
+            showingEdited = !showingEdited;
+            requestAnimationFrame(() => item.classList.remove('switching'));
+        }, 180);
     });
 });
 
