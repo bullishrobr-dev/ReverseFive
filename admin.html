@@ -741,12 +741,12 @@
 
                 <!-- Bridge / Local Server Setup -->
                 <div class="deal-section" style="margin-top:2rem;background:rgba(10,186,181,0.03);">
-                    <h2 style="font-size:1.1rem;">Bridge Setup (Optional)</h2>
-                    <p class="subtitle">If the receipt does not print correctly from the browser, install this tiny local bridge. It runs on your shop computer and sends raw commands to the thermal printer.</p>
+                    <h2 style="font-size:1.1rem;">Local Print Server (Recommended)</h2>
+                    <p class="subtitle">For reliable thermal printing with logo and QR code. This tiny program runs on your shop computer and sends raw printer commands directly to your BIXOLON — bypassing the Windows driver completely.</p>
 
                     <div style="background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:10px;padding:1.25rem;margin-top:1rem;">
-                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 1: Download</h3>
-                        <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.75rem;">Save these two files to your shop computer (right-click → Save Link As):</p>
+                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 1: Download (one time)</h3>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.75rem;">Right-click each link → Save Link As → put both files in the same folder on your shop computer:</p>
                         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
                             <a href="printer-server.py" download class="btn" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);font-size:0.8125rem;padding:0.5rem 1rem;text-decoration:none;display:inline-block;">Download printer-server.py</a>
                             <a href="start-printer.bat" download class="btn" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);font-size:0.8125rem;padding:0.5rem 1rem;text-decoration:none;display:inline-block;">Download start-printer.bat</a>
@@ -754,17 +754,24 @@
                     </div>
 
                     <div style="background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:10px;padding:1.25rem;margin-top:0.75rem;">
-                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 2: Run</h3>
-                        <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.5rem;">Double-click <code style="background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;">start-printer.bat</code> on your Windows computer. A black window will open — leave it running.</p>
-                        <p style="font-size:0.8125rem;color:var(--text-muted);">No installation needed. No Python required (it's included in the batch file check).</p>
+                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 2: Start the server (every day)</h3>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.5rem;">Double-click <code style="background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;">start-printer.bat</code>. A black window opens showing <em>"Zero Lines Thermal Print Server"</em>.</p>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);"><strong>Leave this window open</strong> while you work. It does not interfere with your POS system.</p>
                     </div>
 
                     <div style="background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:10px;padding:1.25rem;margin-top:0.75rem;">
                         <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 3: Print</h3>
-                        <p style="font-size:0.8125rem;color:var(--text-muted);">Once the bridge is running, click <strong>Print Receipt</strong> above. The receipt will be sent directly to your thermal printer as plain text.</p>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);">Click <strong>Print Receipt</strong> above. The receipt prints instantly — no dialog, no popups. Logo, QR code, text — everything.</p>
                     </div>
 
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;">Works with BIXOLON SRP-350, 58mm and 80mm Series Printers. If your printer name is different, open <code>printer-server.py</code> in Notepad and change the <code>PRINTER_NAME</code> line.</p>
+                    <div style="background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:10px;padding:1.25rem;margin-top:0.75rem;">
+                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Troubleshooting</h3>
+                        <ul style="font-size:0.8125rem;color:var(--text-muted);padding-left:1.25rem;line-height:1.6;">
+                            <li>If nothing prints, check that the black server window is still open</li>
+                            <li>If you see "Cannot open printer", open <code>printer-server.py</code> in Notepad and change <code>PRINTER_NAME</code> to match your exact printer name from Windows Settings</li>
+                            <li>The POS system and this server can run at the same time — they do not conflict</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1084,8 +1091,8 @@
             }
         });
 
-        // Print Receipt — opens canvas receipt with logo + QR code
-        document.getElementById('deal-print').addEventListener('click', () => {
+        // Print Receipt — sends to local ESC/POS print server
+        document.getElementById('deal-print').addEventListener('click', async () => {
             const url = offerUrlDiv.textContent;
             if (!url) return;
 
@@ -1093,16 +1100,25 @@
             const encoded = params.get('d');
             if (!encoded) return;
 
-            const printURL = window.location.origin + window.location.pathname.replace('admin.html', '') + 'print.html?d=' + encoded;
+            try {
+                const offer = JSON.parse(atob(encoded));
 
-            const printWindow = window.open(
-                printURL,
-                'receipt',
-                'width=640,height=900,top=20,left=20,scrollbars=yes,resizable=yes'
-            );
+                showDealMessage('Sending to printer...', 'success');
 
-            if (!printWindow) {
-                showDealMessage('Please allow popups to print the receipt', 'error');
+                const response = await fetch('http://127.0.0.1:8765/print', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(offer),
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showDealMessage('Receipt printed!', 'success');
+                } else {
+                    showDealMessage('Print failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                showDealMessage('Cannot connect to print server. Make sure start-printer.bat is running.', 'error');
             }
         });
 
