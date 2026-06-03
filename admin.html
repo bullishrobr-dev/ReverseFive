@@ -738,6 +738,34 @@
                     </div>
                     <div class="offer-url" id="offer-url"></div>
                 </div>
+
+                <!-- Bridge / Local Server Setup -->
+                <div class="deal-section" style="margin-top:2rem;background:rgba(10,186,181,0.03);">
+                    <h2 style="font-size:1.1rem;">Bridge Setup (Optional)</h2>
+                    <p class="subtitle">If the receipt does not print correctly from the browser, install this tiny local bridge. It runs on your shop computer and sends raw commands to the thermal printer.</p>
+
+                    <div style="background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:10px;padding:1.25rem;margin-top:1rem;">
+                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 1: Download</h3>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.75rem;">Save these two files to your shop computer (right-click → Save Link As):</p>
+                        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                            <a href="printer-server.py" download class="btn" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);font-size:0.8125rem;padding:0.5rem 1rem;text-decoration:none;display:inline-block;">Download printer-server.py</a>
+                            <a href="start-printer.bat" download class="btn" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);font-size:0.8125rem;padding:0.5rem 1rem;text-decoration:none;display:inline-block;">Download start-printer.bat</a>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:10px;padding:1.25rem;margin-top:0.75rem;">
+                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 2: Run</h3>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.5rem;">Double-click <code style="background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;">start-printer.bat</code> on your Windows computer. A black window will open — leave it running.</p>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);">No installation needed. No Python required (it's included in the batch file check).</p>
+                    </div>
+
+                    <div style="background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:10px;padding:1.25rem;margin-top:0.75rem;">
+                        <h3 style="font-size:0.875rem;color:var(--accent-turquoise);margin-bottom:0.75rem;">Step 3: Print</h3>
+                        <p style="font-size:0.8125rem;color:var(--text-muted);">Once the bridge is running, click <strong>Print Receipt</strong> above. The receipt will be sent directly to your thermal printer as plain text.</p>
+                    </div>
+
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;">Works with BIXOLON SRP-350, 58mm and 80mm Series Printers. If your printer name is different, open <code>printer-server.py</code> in Notepad and change the <code>PRINTER_NAME</code> line.</p>
+                </div>
             </div>
         </div>
     </div>
