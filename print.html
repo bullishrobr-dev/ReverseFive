@@ -1,50 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Receipt</title>
+    <title>Zero Lines Receipt</title>
     <style>
-        * { margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: "Courier New", monospace;
-            font-size: 13px;
-            line-height: 1.3;
-            color: #000;
-            background: #fff;
-            padding: 8px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
         }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: "Courier New", monospace;
-            font-size: 13px;
-            line-height: 1.3;
+        #receipt-container {
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+        #receipt-canvas {
+            display: block;
         }
         .btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            font-family: "Courier New", monospace;
-            font-size: 14px;
-            background: #000;
-            color: #fff;
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 600;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
+            margin: 8px;
         }
-        @media print {
-            .btn { display: none; }
-            body { padding: 4px; }
+        .btn-print {
+            background: #0ABAB5;
+            color: #fff;
         }
+        .btn-print:hover {
+            background: #089994;
+        }
+        .btn-download {
+            background: #333;
+            color: #fff;
+        }
+        .status {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #666;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <button class="btn" onclick="window.print()">PRINT RECEIPT</button>
-    <pre id="receipt"></pre>
-    <button class="btn" onclick="window.print()">PRINT RECEIPT</button>
+    <div id="receipt-container" class="hidden">
+        <canvas id="receipt-canvas"></canvas>
+    </div>
 
+    <div id="controls">
+        <p class="status">Generating receipt...</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
     (function() {
+        const PAPER_W = 576; // 80mm at 203 DPI
+        const MARGIN = 24;
+        const CONTENT_W = PAPER_W - (MARGIN * 2);
+        const LINE_H = 26;
+        const FONT = '16px Arial, sans-serif';
+        const FONT_BOLD = 'bold 16px Arial, sans-serif';
+        const FONT_BIG = 'bold 22px Arial, sans-serif';
+        const FONT_SMALL = '13px Arial, sans-serif';
+        const FONT_TINY = '11px Arial, sans-serif';
+
+        const giftNames = {
+            'day-cream':'Crema de Dia','night-cream':'Crema de Noche',
+            'facial-serum':'Serum Facial','eye-serum':'Serum de Ojos',
+            'eye-cream':'Contorno de Ojos','facial-peel':'Peeling Facial',
+            'body-scrub':'Exfoliante Corporal','body-butter':'Mantequilla Corporal',
+            'nail-kit':'Kit de Unas','facial-cleanser':'Limpiador Facial'
+        };
+
         function getOffer() {
             var p = new URLSearchParams(location.search).get('d');
             if (!p) return null;
@@ -52,100 +87,330 @@
             catch(e) { return null; }
         }
 
-        var giftNames = {
-            'day-cream':'Crema de Dia',
-            'night-cream':'Crema de Noche',
-            'facial-serum':'Serum Facial',
-            'eye-serum':'Serum de Ojos',
-            'eye-cream':'Contorno de Ojos',
-            'facial-peel':'Peeling Facial',
-            'body-scrub':'Exfoliante Corporal',
-            'body-butter':'Mantequilla Corporal',
-            'nail-kit':'Kit de Unas',
-            'facial-cleanser':'Limpiador Facial'
-        };
+        function wrapText(ctx, text, maxWidth) {
+            var words = text.split(' ');
+            var lines = [];
+            var line = '';
+            for (var i = 0; i < words.length; i++) {
+                var test = line + words[i] + ' ';
+                if (ctx.measureText(test).width > maxWidth && line !== '') {
+                    lines.push(line.trim());
+                    line = words[i] + ' ';
+                } else {
+                    line = test;
+                }
+            }
+            lines.push(line.trim());
+            return lines;
+        }
 
+        function drawDashedLine(ctx, y) {
+            ctx.beginPath();
+            ctx.setLineDash([6, 4]);
+            ctx.moveTo(MARGIN, y);
+            ctx.lineTo(PAPER_W - MARGIN, y);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function generateReceipt(offer, qrCanvas, logoImg, callback) {
+            // Calculate height
+            var y = MARGIN;
+            y += 70; // logo
+            y += LINE_H; // ZERO LINES
+            y += 18; // Andorra
+            y += 16; // dashed
+            y += LINE_H; // OFERTA EXCLUSIVA
+            y += 10;
+            y += 30; // Oferta Especial
+            y += LINE_H; // customer
+            y += 10;
+            y += 18; // seller
+            y += 16; // dashed
+            y += 10;
+            y += 22; // product
+            y += 18; // desc
+            y += 16; // dashed
+            y += 10;
+            y += LINE_H; // regular
+            y += 30; // your price
+            y += LINE_H; // savings
+            y += 16; // dashed
+
+            var gifts = offer.gifts || [];
+            if (gifts.length > 0) {
+                y += LINE_H;
+                y += gifts.length * 22;
+                y += 16;
+            }
+
+            if (offer.note) {
+                var noteLines = wrapText({font: FONT_SMALL, measureText: function(t){return{width:0}}}, offer.note, CONTENT_W);
+                y += noteLines.length * 18 + 8;
+                y += 16;
+            }
+
+            y += LINE_H; // QR header
+            y += 160; // QR
+            y += 16; // dashed
+            y += 18; // expiry label
+            y += 22; // expiry date
+            y += 16; // dashed
+            y += 18; // footer 1
+            y += 18; // footer 2
+            y += 18; // footer 3
+            y += 16; // dashed
+            y += MARGIN;
+
+            var canvas = document.getElementById('receipt-canvas');
+            canvas.width = PAPER_W;
+            canvas.height = y;
+
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, PAPER_W, y);
+
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center';
+
+            var drawY = MARGIN;
+
+            // Logo
+            if (logoImg) {
+                var logoW = 120;
+                var logoH = logoW * (logoImg.height / logoImg.width);
+                ctx.drawImage(logoImg, (PAPER_W - logoW) / 2, drawY, logoW, logoH);
+                drawY += logoH + 8;
+            }
+
+            // Header
+            ctx.font = FONT_BOLD;
+            ctx.fillText('ZERO LINES', PAPER_W / 2, drawY);
+            drawY += 18;
+            ctx.font = FONT_SMALL;
+            ctx.fillText('Andorra', PAPER_W / 2, drawY);
+            drawY += 12;
+            drawDashedLine(ctx, drawY);
+            drawY += 18;
+
+            ctx.font = FONT_BOLD;
+            ctx.fillText('OFERTA EXCLUSIVA', PAPER_W / 2, drawY);
+            drawY += 24;
+
+            ctx.font = FONT_BIG;
+            ctx.fillText('Oferta Especial', PAPER_W / 2, drawY);
+            drawY += 30;
+
+            ctx.font = FONT;
+            ctx.fillText('Para: ' + (offer.customer || 'Usted'), PAPER_W / 2, drawY);
+            drawY += LINE_H + 4;
+
+            ctx.font = FONT_SMALL;
+            ctx.fillText('Preparada por: ' + (offer.seller || 'Vendedor'), PAPER_W / 2, drawY);
+            drawY += 20;
+            drawDashedLine(ctx, drawY);
+            drawY += 18;
+
+            // Product
+            ctx.font = FONT_BOLD;
+            ctx.fillText('Reverse Five Wrinkle Eraser', PAPER_W / 2, drawY);
+            drawY += 24;
+            ctx.font = FONT_SMALL;
+            var units = offer.units || 1;
+            ctx.fillText(units + ' unidad' + (units > 1 ? 'es' : '') + ' · 100 tratamientos · 2 anos', PAPER_W / 2, drawY);
+            drawY += 22;
+            drawDashedLine(ctx, drawY);
+            drawY += 18;
+
+            // Pricing
+            ctx.textAlign = 'left';
+            var regular = 300 * units;
+            var custom = offer.price * units;
+            var savings = regular - custom;
+
+            ctx.font = FONT;
+            ctx.fillText('Precio regular:', MARGIN, drawY);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#888';
+            ctx.fillText('EUR ' + regular, PAPER_W - MARGIN, drawY);
+            ctx.fillStyle = '#000';
+            drawY += LINE_H;
+
+            ctx.textAlign = 'left';
+            ctx.font = FONT_BOLD;
+            ctx.fillText('TU PRECIO:', MARGIN, drawY);
+            ctx.textAlign = 'right';
+            ctx.fillText('EUR ' + custom, PAPER_W - MARGIN, drawY);
+            drawY += 30;
+
+            ctx.textAlign = 'left';
+            ctx.fillText('AHORRAS:', MARGIN, drawY);
+            ctx.textAlign = 'right';
+            ctx.fillText('EUR ' + savings, PAPER_W - MARGIN, drawY);
+            drawY += LINE_H + 4;
+
+            ctx.textAlign = 'center';
+            drawDashedLine(ctx, drawY);
+            drawY += 18;
+
+            // Gifts
+            if (gifts.length > 0) {
+                ctx.font = FONT_BOLD;
+                ctx.fillText('REGALOS INCLUIDOS (' + gifts.length + ')', PAPER_W / 2, drawY);
+                drawY += LINE_H + 4;
+                ctx.textAlign = 'left';
+                ctx.font = FONT;
+                gifts.forEach(function(g) {
+                    ctx.fillText('+ ' + (giftNames[g] || g), MARGIN + 20, drawY);
+                    drawY += 22;
+                });
+                ctx.textAlign = 'center';
+                drawDashedLine(ctx, drawY);
+                drawY += 18;
+            }
+
+            // Note
+            if (offer.note) {
+                ctx.font = FONT_SMALL;
+                ctx.fillStyle = '#555';
+                var wrapped = wrapText(ctx, '"' + offer.note + '"', CONTENT_W);
+                wrapped.forEach(function(line) {
+                    ctx.fillText(line, PAPER_W / 2, drawY);
+                    drawY += 18;
+                });
+                ctx.fillStyle = '#000';
+                drawDashedLine(ctx, drawY);
+                drawY += 18;
+            }
+
+            // QR Code
+            ctx.font = FONT_BOLD;
+            ctx.fillText('ESCANEA PARA RECLAMAR', PAPER_W / 2, drawY);
+            drawY += 12;
+
+            if (qrCanvas) {
+                var qrSize = 140;
+                ctx.drawImage(qrCanvas, (PAPER_W - qrSize) / 2, drawY, qrSize, qrSize);
+                drawY += qrSize + 8;
+            }
+            drawDashedLine(ctx, drawY);
+            drawY += 18;
+
+            // Expiry
+            ctx.font = FONT_SMALL;
+            ctx.fillText('Oferta expira:', PAPER_W / 2, drawY);
+            drawY += 22;
+            ctx.font = FONT_BOLD;
+            var expiry = new Date(offer.expires);
+            ctx.fillText(expiry.toLocaleString('es-ES'), PAPER_W / 2, drawY);
+            drawY += 28;
+            drawDashedLine(ctx, drawY);
+            drawY += 18;
+
+            // Footer
+            ctx.font = FONT_SMALL;
+            ctx.fillText('Gracias por su confianza', PAPER_W / 2, drawY);
+            drawY += 20;
+            ctx.fillText('Zero Lines - Andorra', PAPER_W / 2, drawY);
+            drawY += 20;
+            ctx.fillText('+350 5400 5198', PAPER_W / 2, drawY);
+            drawY += 20;
+            drawDashedLine(ctx, drawY);
+
+            callback(canvas);
+        }
+
+        // Main
         var offer = getOffer();
         if (!offer) {
-            document.getElementById('receipt').textContent = 'Oferta no encontrada';
+            document.querySelector('.status').textContent = 'Oferta no encontrada';
             return;
         }
 
-        var units = offer.units || 1;
-        var regular = 300 * units;
-        var custom = offer.price * units;
-        var savings = regular - custom;
-        var expiry = new Date(offer.expires);
-        var gifts = offer.gifts || [];
+        // Load logo and generate QR in parallel
+        var logoImg = new Image();
+        var qrReady = false;
+        var logoReady = false;
+        var qrCanvasEl = null;
 
-        var lines = [];
-        lines.push('');
-        lines.push('       ZERO LINES');
-        lines.push('       ANDORRA');
-        lines.push('----------------------------');
-        lines.push('      OFERTA EXCLUSIVA');
-        lines.push('');
-        lines.push('      Oferta Especial');
-        lines.push('      Para: ' + (offer.customer || 'Usted'));
-        lines.push('');
-        lines.push('  Preparada por: ' + (offer.seller || 'Vendedor'));
-        lines.push('----------------------------');
-        lines.push('');
-        lines.push('   Reverse Five Wrinkle');
-        lines.push('        Eraser');
-        lines.push('');
-        lines.push('  ' + units + ' unidad' + (units > 1 ? 'es' : ''));
-        lines.push('  100 tratamientos - 2 anos');
-        lines.push('----------------------------');
-        lines.push('');
-        lines.push('Precio regular:     EUR ' + regular);
-        lines.push('TU PRECIO:          EUR ' + custom);
-        lines.push('AHORRAS:            EUR ' + savings);
-        lines.push('----------------------------');
-        lines.push('');
+        logoImg.crossOrigin = 'anonymous';
+        logoImg.onload = function() {
+            logoReady = true;
+            if (qrReady) buildReceipt();
+        };
+        logoImg.onerror = function() {
+            logoReady = true;
+            if (qrReady) buildReceipt();
+        };
+        logoImg.src = 'assets/zerolines-logo.png';
 
-        if (gifts.length > 0) {
-            lines.push('REGALOS INCLUIDOS (' + gifts.length + ')');
-            lines.push('');
-            gifts.forEach(function(g) {
-                lines.push('+ ' + (giftNames[g] || g));
+        // Generate QR
+        var qrDiv = document.createElement('div');
+        new QRCode(qrDiv, {
+            text: location.href,
+            width: 140,
+            height: 140,
+            colorDark: '#000',
+            colorLight: '#fff',
+            correctLevel: QRCode.CorrectLevel.M,
+        });
+
+        setTimeout(function() {
+            qrCanvasEl = qrDiv.querySelector('canvas') || qrDiv.querySelector('img');
+            qrReady = true;
+            if (logoReady) buildReceipt();
+        }, 300);
+
+        function buildReceipt() {
+            generateReceipt(offer, qrCanvasEl, logoImg && logoImg.width > 0 ? logoImg : null, function(canvas) {
+                document.getElementById('receipt-container').classList.remove('hidden');
+
+                var controls = document.getElementById('controls');
+                controls.innerHTML = '';
+
+                var printBtn = document.createElement('button');
+                printBtn.className = 'btn btn-print';
+                printBtn.textContent = 'PRINT RECEIPT';
+                printBtn.onclick = function() {
+                    printImage(canvas);
+                };
+                controls.appendChild(printBtn);
+
+                var downloadBtn = document.createElement('button');
+                downloadBtn.className = 'btn btn-download';
+                downloadBtn.textContent = 'DOWNLOAD PNG';
+                downloadBtn.onclick = function() {
+                    var link = document.createElement('a');
+                    link.download = 'zero-lines-receipt.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                };
+                controls.appendChild(downloadBtn);
+
+                var status = document.createElement('p');
+                status.className = 'status';
+                status.textContent = 'Receipt ready. Click PRINT RECEIPT to send to your thermal printer.';
+                controls.appendChild(status);
+
+                // Auto-print after 1 second
+                setTimeout(function() {
+                    printImage(canvas);
+                }, 1000);
             });
-            lines.push('');
-            lines.push('----------------------------');
-            lines.push('');
         }
 
-        if (offer.note) {
-            lines.push('"' + offer.note + '"');
-            lines.push('');
-            lines.push('----------------------------');
-            lines.push('');
+        function printImage(canvas) {
+            var dataUrl = canvas.toDataURL('image/png');
+            var w = window.open('', '_blank');
+            if (!w) {
+                alert('Please allow popups to print the receipt');
+                return;
+            }
+            w.document.write('<!DOCTYPE html><html><head><title>Receipt</title><style>body{margin:0;padding:0;text-align:center;}img{max-width:100%;display:block;margin:0 auto;}</style></head><body><img src="' + dataUrl + '" onload="setTimeout(function(){window.print();},300);"></body></html>');
+            w.document.close();
         }
-
-        lines.push('RECLAMA TU OFERTA:');
-        lines.push('');
-        var url = location.href;
-        for (var i = 0; i < url.length; i += 28) {
-            lines.push(url.substring(i, i + 28));
-        }
-        lines.push('');
-        lines.push('----------------------------');
-        lines.push('');
-        lines.push('Oferta expira:');
-        lines.push(expiry.toLocaleString('es-ES'));
-        lines.push('');
-        lines.push('----------------------------');
-        lines.push('');
-        lines.push('Gracias por su confianza');
-        lines.push('Zero Lines - Andorra');
-        lines.push('+350 5400 5198');
-        lines.push('');
-        lines.push('============================');
-        lines.push('');
-        lines.push('');
-        lines.push('');
-
-        document.getElementById('receipt').textContent = lines.join('\n');
     })();
     </script>
 </body>
