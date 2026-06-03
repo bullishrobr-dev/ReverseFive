@@ -191,7 +191,7 @@
                 <div class="qr-area visible" style="margin-top:0;border-top:1px solid var(--border-subtle);">
                     <h3>Escanea para reclamar</h3>
                     <div id="qrcode"></div>
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">O visita este enlace desde tu móvil</p>
+                    <p class="qr-hint" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">O visita este enlace desde tu móvil</p>
                 </div>
             </div>
         </div>
@@ -268,8 +268,8 @@
             qrcodeDiv.innerHTML = '';
             new QRCode(qrcodeDiv, {
                 text: window.location.href,
-                width: 160,
-                height: 160,
+                width: 100,
+                height: 100,
                 colorDark: '#0a0a0a',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M,
