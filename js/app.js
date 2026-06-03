@@ -320,12 +320,6 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         ease: 'none',
         scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: true }
     });
-    // Hero particles drift subtly
-    gsap.to('#hero-canvas', {
-        y: -100,
-        ease: 'none',
-        scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
-    });
     // Product image gentle parallax
     gsap.to('.product-float', {
         y: -60,
@@ -501,111 +495,6 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 // ============================================
 // CANVAS PARTICLE BACKGROUND
 // ============================================
-const canvas = document.getElementById('hero-canvas');
-
-// Disable on touch/mobile devices for performance
-if (canvas && window.matchMedia('(pointer: coarse)').matches) {
-    canvas.style.display = 'none';
-}
-
-const ctx = canvas ? canvas.getContext('2d') : null;
-let particles = [];
-let animationId;
-
-if (!canvas || !ctx) {
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-class Particle {
-    constructor() {
-        this.reset();
-    }
-
-    reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.3;
-        this.speedY = (Math.random() - 0.5) * 0.3;
-        this.opacity = Math.random() * 0.5 + 0.1;
-        this.hue = Math.random() > 0.5 ? 178 : 45; // turquoise or gold
-    }
-
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-            this.reset();
-        }
-    }
-
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${this.hue}, 70%, 60%, ${this.opacity})`;
-        ctx.fill();
-    }
-}
-
-// Create particles
-for (let i = 0; i < 60; i++) {
-    particles.push(new Particle());
-}
-
-// Draw connections
-function drawConnections() {
-    for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 150) {
-                ctx.beginPath();
-                ctx.moveTo(particles[i].x, particles[i].y);
-                ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.strokeStyle = `rgba(10, 186, 181, ${0.05 * (1 - distance / 150)})`;
-                ctx.lineWidth = 0.5;
-                ctx.stroke();
-            }
-        }
-    }
-}
-
-function animateCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach(particle => {
-        particle.update();
-        particle.draw();
-    });
-
-    drawConnections();
-    animationId = requestAnimationFrame(animateCanvas);
-}
-
-animateCanvas();
-
-// Pause animation when not visible
-const canvasObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            if (!animationId) animateCanvas();
-        } else {
-            cancelAnimationFrame(animationId);
-            animationId = null;
-        }
-    });
-}, { threshold: 0 });
-
-canvasObserver.observe(canvas);
-}
 
 // ============================================
 // CART FUNCTIONALITY
@@ -1022,7 +911,7 @@ const translations = {
         faq_q6: 'How long does one syringe last?',
         faq_a6: 'One syringe provides approximately 100 applications. With the recommended once-weekly frequency, this is designed to last approximately two years of consistent use following the protocol.',
         faq_q7: 'What results timeline should I expect?',
-        faq_a7: 'Reverse Five is designed as a progressive refinement protocol, not an instant solution. Visible results develop gradually over consistent weekly use. After completing the full protocol (approximately two years), results may be maintained for 6–18 months.',
+        faq_a7: 'Most users notice a visible difference from the very first application — smoother texture, softer lines, and a refreshed appearance. The full structural transformation builds over consistent weekly use, and because the change comes from your skin\'s own collagen activation, results maintain themselves for 6–18 months after completing the protocol.',
         faq_q8: 'Can I combine with other products?',
         faq_a8: 'Yes, Reverse Five is designed to work alongside your existing skincare routine. However, during the 5-hour activation window, do not apply other products to treated areas. After activation, resume your normal product regimen.',
         cta_title: 'Experience the difference',
@@ -1276,7 +1165,7 @@ const translations = {
         faq_q6: 'Combien de temps dure une seringue?',
         faq_a6: 'Une seringue fournit environ 100 applications. Avec la fréquence hebdomadaire recommandée, cela est conçu pour durer environ deux ans d\'utilisation constante selon le protocole.',
         faq_q7: 'Quel délai de résultats dois-je attendre?',
-        faq_a7: 'Reverse Five est conçu comme un protocole d\'affinement progressif, pas une solution instantanée. Les résultats visibles se développent progressivement avec une utilisation hebdomadaire constante. Après avoir terminé le protocole complet (environ deux ans), les résultats peuvent être maintenus pendant 6 à 18 mois.',
+        faq_a7: 'La plupart des utilisateurs remarquent une différence visible dès la toute première application — une texture plus lisse, des ridules adoucies et un teint rafraîchi. La transformation structurelle complète se construit avec une utilisation hebdomadaire constante, et parce que le changement provient de l\'activation naturelle du collagène de votre peau, les résultats se maintiennent d\'eux-mêmes pendant 6 à 18 mois après avoir terminé le protocole.',
         faq_q8: 'Puis-je le combiner avec d\'autres produits?',
         faq_a8: 'Oui, Reverse Five est conçu pour fonctionner aux côtés de votre routine de soins existante. Cependant, pendant la fenêtre d\'activation de 5 heures, n\'appliquez pas d\'autres produits sur les zones traitées. Après l\'activation, reprenez votre régime de produits normal.',
         cta_title: 'Faites l\'expérience de la différence',
@@ -1547,7 +1436,7 @@ const translations = {
         faq_q6: 'Wie lange hält eine Spritze?',
         faq_a6: 'Eine Spritze bietet ca. 100 Anwendungen. Bei der empfohlenen wöchentlichen Frequenz ist sie für ca. zwei Jahre konsequenter Nutzung nach dem Protokoll ausgelegt.',
         faq_q7: 'Welchen Ergebniszeitplan sollte ich erwarten?',
-        faq_a7: 'Reverse Five ist als progressives Verfeinerungsprotokoll konzipiert, nicht als sofortige Lösung. Sichtbare Ergebnisse entwickeln sich allmählich bei konsequenter wöchentlicher Anwendung. Nach Abschluss des vollständigen Protokolls (ca. zwei Jahre) können Ergebnisse für 6–18 Monate erhalten bleiben.',
+        faq_a7: 'Die meisten Anwender bemerken einen sichtbaren Unterschied bereits bei der ersten Anwendung — glattere Haut, weichere Linien und ein erfrischtes Erscheinungsbild. Die vollständige strukturelle Transformation baut sich bei konsequenter wöchentlicher Anwendung auf, und da die Veränderung aus der eigenen Kollagenaktivierung Ihrer Haut stammt, halten sich die Ergebnisse 6–18 Monate nach Protokollabschluss von selbst.',
         faq_q8: 'Kann ich es mit anderen Produkten kombinieren?',
         faq_a8: 'Ja, Reverse Five ist entwickelt, um neben Ihrer bestehenden Hautpflegeroutine zu funktionieren. Während des 5-stündigen Aktivierungsfensters jedoch keine anderen Produkte auf behandelte Bereiche auftragen. Nach der Aktivierung fahren Sie mit Ihrem normalen Produktregime fort.',
         cta_title: 'Erleben Sie den Unterschied',
@@ -1810,7 +1699,7 @@ const translations = {
         faq_q6: '¿Cuánto dura una jeringa?',
         faq_a6: 'Una jeringa proporciona aproximadamente 100 aplicaciones. Con la frecuencia semanal recomendada, está diseñada para durar aproximadamente dos años de uso constante siguiendo el protocolo.',
         faq_q7: '¿Qué cronograma de resultados debo esperar?',
-        faq_a7: 'Reverse Five está diseñado como un protocolo de refinamiento progresivo, no una solución instantánea. Los resultados visibles se desarrollan gradualmente con un uso semanal constante. Después de completar el protocolo completo (aproximadamente dos años), los resultados pueden mantenerse durante 6–18 meses.',
+        faq_a7: 'La mayoría de los usuarios notan una diferencia visible desde la primera aplicación — textura más suave, líneas más tenues y una apariencia rejuvenecida. La transformación estructural completa se construye con un uso semanal constante, y como el cambio proviene de la activación natural del colágeno de tu piel, los resultados se mantienen por sí solos durante 6–18 meses después de completar el protocolo.',
         faq_q8: '¿Puedo combinarlo con otros productos?',
         faq_a8: 'Sí, Reverse Five está diseñado para funcionar junto con tu rutina de cuidado de la piel existente. Sin embargo, durante la ventana de activación de 5 horas, no apliques otros productos en las áreas tratadas. Después de la activación, reanuda tu régimen de productos normal.',
         cta_title: 'Experimenta la diferencia',
@@ -2073,7 +1962,7 @@ const translations = {
         faq_q6: 'Quanto tempo dura uma seringa?',
         faq_a6: 'Uma seringa fornece aproximadamente 100 aplicações. Com a frequência semanal recomendada, é concebida para durar aproximadamente dois anos de uso consistente seguindo o protocolo.',
         faq_q7: 'Que cronograma de resultados devo esperar?',
-        faq_a7: 'Reverse Five é concebido como um protocolo de refinamento progressivo, não uma solução instantânea. Os resultados visíveis desenvolvem-se gradualmente com uso semanal consistente. Após completar o protocolo completo (aproximadamente dois anos), os resultados podem ser mantidos durante 6–18 meses.',
+        faq_a7: 'A maioria dos utilizadores nota uma diferença visível desde a primeira aplicação — textura mais suave, linhas mais suaves e uma aparência revitalizada. A transformação estrutural completa constrói-se com uso semanal consistente, e como a mudança provém da ativação natural do colagénio da sua pele, os resultados mantêm-se por 6–18 meses após completar o protocolo.',
         faq_q8: 'Posso combiná-lo com outros produtos?',
         faq_a8: 'Sim, Reverse Five é concebido para funcionar junto com a sua rotina de cuidados existente. No entanto, durante a janela de ativação de 5 horas, não aplique outros produtos nas áreas tratadas. Após a ativação, retome o seu regime normal de produtos.',
         cta_title: 'Experimente a diferença',
@@ -2336,7 +2225,7 @@ const translations = {
         faq_q6: 'Hvor længe holder en sprøjte?',
         faq_a6: 'Én sprøjte giver ca. 100 påføringer. Med den anbefalede ugentlige frekvens er den designet til at vare ca. to år ved konsekvent brug i henhold til protokollen.',
         faq_q7: 'Hvilket resultattidslinje skal jeg forvente?',
-        faq_a7: 'Reverse Five er designet som et progressivt forfinelsesprotokol, ikke en øjeblikkelig løsning. Synlige resultater udvikles gradvist ved konsekvent ugentlig brug. Efter gennemførelse af den fulde protokol (ca. to år) kan resultater opretholdes i 6–18 måneder.',
+        faq_a7: 'De fleste brugere bemærker en synlig forskel allerede fra den første påføring — blødere hud, mildere linjer og et forfrisket udseende. Den fulde strukturelle transformation opbygges ved konsekvent ugentlig brug, og fordi forandringen kommer fra hudens egen kollagenaktivering, opretholdes resultaterne i 6–18 måneder efter protokollens afslutning.',
         faq_q8: 'Kan jeg kombinere det med andre produkter?',
         faq_a8: 'Ja, Reverse Five er designet til at fungere sammen med din eksisterende hudplejerutine. I løbet af det 5-timers aktiveringsvindue må du dog ikke påføre andre produkter på de behandlede områder. Efter aktiveringen genoptages dit normale produktregime.',
         cta_title: 'Oplev forskellen',
@@ -2599,7 +2488,7 @@ const translations = {
         faq_q6: 'Jak długo wystarcza jedna strzykawka?',
         faq_a6: 'Jedna strzykawka zapewnia około 100 aplikacji. Przy zalecanej częstotliwości cotygodniowej jest zaprojektowana, aby wystarczyć na około dwa lata konsekwentnego stosowania zgodnie z protokołem.',
         faq_q7: 'Jakiego czasu oczekiwania na wyniki powinienem się spodziewać?',
-        faq_a7: 'Reverse Five został zaprojektowany jako protokół progresywnego ulepszania, a nie natychmiastowe rozwiązanie. Widoczne wyniki rozwijają się stopniowo przy konsekwentnym, cotygodniowym stosowaniu. Po ukończeniu pełnego protokołu (około dwa lata), wyniki mogą być utrzymane przez 6–18 miesięcy.',
+        faq_a7: 'Większość użytkowników zauważa widoczną różnicę już od pierwszego zastosowania — gładsza tekstura, miększe zmarszczki i odświeżony wygląd. Pełna transformacja strukturalna buduje się przy konsekwentnym, cotygodniowym stosowaniu, a ponieważ zmiana wynika z własnej aktywacji kolagenu skóry, wyniki utrzymują się same przez 6–18 miesięcy po ukończeniu protokołu.',
         faq_q8: 'Czy mogę łączyć z innymi produktami?',
         faq_a8: 'Tak, Reverse Five został zaprojektowany do działania wraz z istniejącą rutyną pielęgnacyjną. Jednak w trakcie 5-godzinnego okna aktywacji nie aplikuj innych produktów na obszary poddane zabiegowi. Po aktywacji wznów normalny schemat produktów.',
         cta_title: 'Doświadcz różnicy',
@@ -2862,7 +2751,7 @@ const translations = {
         faq_q6: 'Как долго хватает одного шприца?',
         faq_a6: 'Один шприц обеспечивает примерно 100 нанесений. При рекомендуемой еженедельной частоте он рассчитан примерно на два года постоянного использования в соответствии с протоколом.',
         faq_q7: 'Какого графика результатов мне ожидать?',
-        faq_a7: 'Reverse Five разработан как протокол прогрессивного улучшения, а не мгновенное решение. Видимые результаты развиваются постепенно при постоянном еженедельном использовании. После завершения полного протокола (примерно год) результаты могут сохраняться в течение 6–18 месяцев.',
+        faq_a7: 'Большинство пользователей замечают видимую разницу уже при первом нанесении — более гладкая текстура, мягкие линии и освежённый вид. Полное структурное преобразование накапливается при постоянном еженедельном использовании, и поскольку изменение исходит из собственной активации коллагена кожи, результаты сохраняются сами по себе в течение 6–18 месяцев после завершения протокола.',
         faq_q8: 'Могу ли я сочетать с другими продуктами?',
         faq_a8: 'Да, Reverse Five разработан для работы вместе с вашей существующей рутиной по уходу за кожей. Однако в течение 5-часового окна активации не наносите другие продукты на обработанные зоны. После активации возобновите свой обычный режим продуктов.',
         cta_title: 'Испытайте разницу',
@@ -3125,7 +3014,7 @@ const translations = {
         faq_q6: 'Quanto dura una siringa?',
         faq_a6: 'Una siringa fornisce circa 100 applicazioni. Con la frequenza settimanale consigliata, questo è progettato per durare circa due anni di utilizzo coerente seguendo il protocollo.',
         faq_q7: 'Quale tempistica dei risultati dovrei aspettarmi?',
-        faq_a7: 'Reverse Five è concepito come un protocollo di perfezionamento progressivo, non come una soluzione istantanea. Risultati visibili si sviluppano gradualmente con l\'uso settimanale costante. Dopo aver completato il protocollo completo (circa due anni), i risultati possono essere mantenuti per 6-18 mesi.',
+        faq_a7: 'La maggior parte degli utenti nota una differenza visibile fin dalla prima applicazione — texture più liscia, linee più morbide e un aspetto rinfrescato. La trasformazione strutturale completa si costruisce con l\'uso settimanale costante, e poiché il cambiamento deriva dall\'attivazione naturale del collagene della pelle, i risultati si mantengono da soli per 6-18 mesi dopo aver completato il protocollo.',
         faq_q8: 'Posso abbinarlo ad altri prodotti?',
         faq_a8: 'Sì, Reverse Five è progettato per funzionare insieme alla tua routine di cura della pelle esistente. Tuttavia, durante la finestra di attivazione di 5 ore, non applicare altri prodotti sulle aree trattate. Dopo l\'attivazione, riprendere il normale regime del prodotto.',
         cta_title: 'Sperimenta la differenza',
@@ -3388,7 +3277,7 @@ const translations = {
         faq_q6: 'Hoe lang gaat één spuit mee?',
         faq_a6: 'Eén spuit biedt ongeveer 100 toepassingen. Met de aanbevolen frequentie van één keer per week is dit ontworpen voor een gebruiksduur van ongeveer twee jaar bij consistent gebruik volgens het protocol.',
         faq_q7: 'Welke resultatentijdlijn moet ik verwachten?',
-        faq_a7: 'Reverse Five is ontworpen als een progressief verfijningsprotocol, niet als een kant-en-klare oplossing. Zichtbare resultaten ontwikkelen zich geleidelijk bij consistent wekelijks gebruik. Na voltooiing van het volledige protocol (ongeveer twee jaar) kunnen de resultaten 6 tot 18 maanden behouden blijven.',
+        faq_a7: 'De meeste gebruikers merken een zichtbaar verschil al vanaf de eerste toepassing — gladdere textuur, zachtere lijnen en een verfrist uiterlijk. De volledige structurele transformatie bouwt zich op bij consistent wekelijks gebruik, en omdat de verandering afkomstig is van de natuurlijke collageenactivering van je huid, houden de resultaten zichzelf 6 tot 18 maanden na voltooiing van het protocol.',
         faq_q8: 'Kan ik combineren met andere producten?',
         faq_a8: 'Ja, Reverse Five is ontworpen om naast uw bestaande huidverzorgingsroutine te werken. Breng tijdens de activeringsperiode van 5 uur echter geen andere producten aan op de behandelde gebieden. Na activering hervat u uw normale productregime.',
         cta_title: 'Ervaar het verschil',
@@ -3651,7 +3540,7 @@ const translations = {
         faq_q6: 'Hur länge håller en spruta?',
         faq_a6: 'En spruta ger cirka 100 applikationer. Med den rekommenderade frekvensen en gång i veckan är detta utformat för att hålla i ungefär två års konsekvent användning enligt protokollet.',
         faq_q7: 'Vilken tidslinje för resultat bör jag förvänta mig?',
-        faq_a7: 'Reverse Five är designad som ett progressivt förfiningsprotokoll, inte en omedelbar lösning. Synliga resultat utvecklas gradvis över konsekvent veckovis användning. Efter att ha slutfört det fullständiga protokollet (ungefär två år) kan resultaten bibehållas i 6–18 månader.',
+        faq_a7: 'De flesta användare märker en synlig skillnad redan från första appliceringen — jämnare struktur, mjukare linjer och ett uppfriskat utseende. Den fullständiga strukturella transformationen byggs upp vid konsekvent veckovis användning, och eftersom förändringen kommer från hudens egna kollagenaktivering, bibehålls resultaten av sig själva i 6–18 månader efter protokollets slutförande.',
         faq_q8: 'Kan jag kombinera med andra produkter?',
         faq_a8: 'Ja, Reverse Five är designad för att fungera tillsammans med din befintliga hudvårdsrutin. Under aktiveringsfönstret på 5 timmar, applicera dock inte andra produkter på behandlade områden. Efter aktivering, återuppta din normala produktregim.',
         cta_title: 'Upplev skillnaden',
@@ -3914,7 +3803,7 @@ const translations = {
         faq_q6: '1本の注射器はどれくらい持続しますか？',
         faq_a6: '1 本のシリンジで約 100 回の塗布が可能です。推奨頻度は週に 1 回で、プロトコルに従って継続的に使用すると約 2 年間持続するように設計されています。',
         faq_q7: 'どのような結果のタイムラインを期待すればよいですか?',
-        faq_a7: 'Reverse Five は、即時のソリューションではなく、漸進的な改良プロトコルとして設計されています。毎週継続的に使用することで、目に見える効果が徐々に現れます。完全なプロトコル (約 1 年) を完了した後、結果は 6 ～ 18 か月間維持されます。',
+        faq_a7: 'ほとんどのユーザーは、最初の使用から違いを実感しています — より滑らかな肌質、柔らかなシワ、そして若々しい印象へ。完全な構造的変化は毎週の継続的な使用で構築され、変化がお肌自身のコラーゲン活性化から生じるため、プロトコル完了後も結果が 6 ～ 18 か月間維持されます。',
         faq_q8: '他の商品と組み合わせることはできますか？',
         faq_a8: 'はい、Reverse Fiveは、既存のスキンケア ルーチンと併用できるように設計されています。ただし、5 時間の活性化期間中は、治療部位に他の製品を塗布しないでください。アクティベーション後は、通常の製品レジメンを再開してください。',
         cta_title: '違いを体験してください',
@@ -4177,7 +4066,7 @@ const translations = {
         faq_q6: '하나의 주사기는 얼마나 오래 지속됩니까?',
         faq_a6: '하나의 주사기로 약 100회 도포가 가능합니다. 권장 빈도는 주 1회이며, 프로토콜에 따라 약 2년간 지속적으로 사용하도록 설계되었습니다.',
         faq_q7: '어떤 결과 일정을 예상해야 합니까?',
-        faq_a7: 'Reverse Five는 즉각적인 솔루션이 아닌 점진적인 개선 프로토콜로 설계되었습니다. 매주 꾸준히 사용하면 눈에 보이는 결과가 점차적으로 나타납니다. 전체 프로토콜(약 2년)을 완료한 후 결과는 6~18개월 동안 유지될 수 있습니다.',
+        faq_a7: '대부분의 사용자는 첫 사용부터 눈에 띄는 변화를 경험합니다 — 더 부드러운 피부결, 옅어진 잔주름, 그리고 생기 있는 인상. 완전한 구조적 변화는 매주 꾸준한 사용으로 쌓이며, 변화가 피부 자체의 콜라겐 활성화에서 오기 때문에 프로토콜 완료 후에도 결과가 6~18개월간 유지됩니다.',
         faq_q8: '다른 제품과 결합할 수 있나요?',
         faq_a8: '네, Reverse Five는 기존 스킨케어 루틴과 함께 사용할 수 있도록 설계되었습니다. 그러나 5시간의 활성화 기간 동안에는 치료 부위에 다른 제품을 바르지 마십시오. 활성화 후 정상적인 제품 요법을 재개하십시오.',
         cta_title: '차이를 경험해 보세요',
@@ -4440,7 +4329,7 @@ const translations = {
         faq_q6: '一支注射器可以使用多长时间？',
         faq_a6: '一支注射器可提供大约 100 次使用。按照建议的每周一次的频率，按照协议持续使用可持续大约两年。',
         faq_q7: '我应该期待什么结果时间表？',
-        faq_a7: 'Reverse Five 被设计为渐进式细化协议，而不是即时解决方案。每周坚持使用，效果逐渐显现。完成完整方案（大约一年）后，结果可能会保留 6-18 个月。',
+        faq_a7: '大多数用户从第一次使用起就注意到明显变化 — 肤质更光滑、细纹更柔和、面貌更精神。完整的结构性转变通过每周坚持使用逐步建立，而且由于变化来自皮肤自身的胶原蛋白激活，完成方案后效果可自然维持 6-18 个月。',
         faq_q8: '我可以与其他产品结合使用吗？',
         faq_a8: '是的，Reverse Five 旨在与您现有的护肤程序配合使用。但是，在 5 小时激活窗口期间，请勿在治疗区域涂抹其他产品。激活后，恢复正常的产品使用方案。',
         cta_title: '体验差异',
@@ -4703,7 +4592,7 @@ const translations = {
         faq_q6: 'كم من الوقت تستمر حقنة واحدة؟',
         faq_a6: 'توفر المحقنة الواحدة حوالي 100 طلبًا. مع التكرار الموصى به مرة واحدة أسبوعيًا، تم تصميم هذا ليدوم حوالي عامين من الاستخدام المستمر بعد البروتوكول.',
         faq_q7: 'ما هو الجدول الزمني للنتائج التي يجب أن أتوقعها؟',
-        faq_a7: 'تم تصميم Reverse Five كبروتوكول تحسين تدريجي، وليس كحل فوري. تظهر النتائج المرئية تدريجيًا مع الاستخدام الأسبوعي المستمر. بعد الانتهاء من البروتوكول الكامل (حوالي عامين)، يمكن الحفاظ على النتائج لمدة 6-18 شهرًا.',
+        faq_a7: 'يلاحظ معظم المستخدمين فرقًا واضحًا من التطبيق الأول — بشرة أكثر نعومة، خطوط أقل حدة، ومظهر منعش. التحول الهيكلي الكامل يتشكل مع الاستخدام الأسبوعي المستمر، ولأن التغيير يأتي من تنشيط الكولاجين الطبيعي لبشرتك، تستمر النتائج من تلقاء نفسها لمدة 6-18 شهرًا بعد إتمام البروتوكول.',
         faq_q8: 'هل يمكنني الدمج مع منتجات أخرى؟',
         faq_a8: 'نعم، تم تصميم Reverse Five للعمل جنبًا إلى جنب مع روتين العناية بالبشرة الموجود لديك. ومع ذلك، خلال فترة التنشيط البالغة 5 ساعات، لا تقم بتطبيق منتجات أخرى على المناطق المعالجة. بعد التنشيط، استأنف نظام المنتج العادي الخاص بك.',
         cta_title: 'تجربة الفرق',
@@ -4966,7 +4855,7 @@ const translations = {
         faq_q6: 'Πόσο διαρκεί μια σύριγγα;',
         faq_a6: 'Μία σύριγγα παρέχει περίπου 100 εφαρμογές. Με τη συνιστώμενη συχνότητα μία φορά την εβδομάδα, έχει σχεδιαστεί για να διαρκεί περίπου δύο έτη συνεπούς χρήσης σύμφωνα με το πρωτόκολλο.',
         faq_q7: 'Τι χρονοδιάγραμμα αποτελεσμάτων πρέπει να περιμένω;',
-        faq_a7: 'Το Reverse Five έχει σχεδιαστεί ως πρωτόκολλο προοδευτικής βελτίωσης, όχι ως άμεση λύση. Τα ορατά αποτελέσματα αναπτύσσονται σταδιακά σε συνεπή εβδομαδιαία χρήση. Μετά την ολοκλήρωση του πλήρους πρωτοκόλλου (περίπου δύο έτη), τα αποτελέσματα μπορούν να διατηρηθούν για 6–18 μήνες.',
+        faq_a7: 'Οι περισσότεροι χρήστες παρατηρούν μια ορατή διαφορά από την πρώτη κιόλας εφαρμογή — πιο λεία υφή, πιο απαλές γραμμές και αναζωογονημένη όψη. Η πλήρης δομική μεταμόρφωση χτίζεται με συνεπή εβδομαδιαία χρήση, και επειδή η αλλαγή προέρχεται από τη δική σας ενεργοποίηση κολλαγόνου, τα αποτελέσματα διατηρούνται μόνα τους για 6–18 μήνες μετά την ολοκλήρωση του πρωτοκόλλου.',
         faq_q8: 'Μπορώ να συνδυάσω με άλλα προϊόντα;',
         faq_a8: 'Ναι, το Reverse Five έχει σχεδιαστεί για να λειτουργεί παράλληλα με την υπάρχουσα ρουτίνα περιποίησης της επιδερμίδας σας. Ωστόσο, κατά τη διάρκεια του παραθύρου ενεργοποίησης 5 ωρών, μην εφαρμόζετε άλλα προϊόντα σε περιοχές που έχουν υποστεί θεραπεία. Μετά την ενεργοποίηση, συνεχίστε το κανονικό σχήμα του προϊόντος σας.',
         cta_title: 'Ζήστε τη διαφορά',
@@ -5802,10 +5691,6 @@ if (prefersReducedMotion.matches) {
     // Disable GSAP animations
     if (typeof gsap !== 'undefined') gsap.globalTimeline.pause();
     
-    // Disable canvas
-    const canvas = document.getElementById('hero-canvas');
-    if (canvas) canvas.style.display = 'none';
-    
     // Disable orbs
     document.querySelectorAll('.orb').forEach(orb => orb.style.display = 'none');
     
@@ -5830,71 +5715,6 @@ prefersReducedMotion.addEventListener('change', (e) => {
 
 // ============================================
 // UPDATE CART UI WITH PRODUCT IMAGE FIX
-// ============================================
-// Override updateCartUI to use dynamic product image
-const originalUpdateCartUI = updateCartUI;
-updateCartUI = function() {
-    cartItems.innerHTML = '';
-    
-    if (cart.length === 0) {
-        cartEmpty.style.display = 'flex';
-        cartFooter.style.display = 'none';
-    } else {
-        cartEmpty.style.display = 'none';
-        cartFooter.style.display = 'block';
-        
-        cart.forEach((item, index) => {
-            const itemEl = document.createElement('div');
-            itemEl.className = 'cart-item';
-            itemEl.innerHTML = `
-                <img src="assets/reverse-five.png" alt="${item.name}" class="cart-item-image">
-                <div class="cart-item-details">
-                    <h4>${item.name}</h4>
-                    <p class="cart-item-price">${formatPrice(item.price)}</p>
-                </div>
-                <div class="cart-item-actions">
-                    <div class="cart-item-quantity">
-                        <button class="qty-btn" data-index="${index}" data-change="-1">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="qty-btn" data-index="${index}" data-change="1">+</button>
-                    </div>
-                    <button class="cart-item-remove" data-index="${index}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            cartItems.appendChild(itemEl);
-        });
-        
-        document.querySelectorAll('.qty-btn').forEach(btn => {
-            btn.addEventListener('click', () => updateQuantity(parseInt(btn.dataset.index), parseInt(btn.dataset.change)));
-        });
-        
-        document.querySelectorAll('.cart-item-remove').forEach(btn => {
-            btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.index)));
-        });
-    }
-    
-    const { subtotal, discount, total } = calculateTotals();
-    
-    cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.classList.toggle('visible', cart.length > 0);
-    
-    document.getElementById('cart-subtotal').textContent = formatPrice(subtotal);
-    
-    const discountRow = document.getElementById('cart-discount-row');
-    if (discount > 0) {
-        discountRow.style.display = 'flex';
-        document.getElementById('cart-discount').textContent = `-${formatPrice(discount)}`;
-    } else {
-        discountRow.style.display = 'none';
-    }
-    
-    cartTotalEl.textContent = formatPrice(total);
-};
 
 // ============================================
 // INITIALLY PRELOAD CURRENT LANGUAGE
