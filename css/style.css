@@ -1153,6 +1153,65 @@ body[data-theme="light"] .hero-guarantee {
     border-color: rgba(212, 175, 55, 0.2);
 }
 
+/* Hero Trust Badges */
+.hero-trust-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.payment-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.payment-icon {
+    width: 36px;
+    height: 24px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.payment-icon:hover {
+    opacity: 1;
+}
+
+.secure-text {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.secure-text svg {
+    flex-shrink: 0;
+}
+
+/* Cart Trust Badges */
+.cart-trust-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: 0.5rem;
+}
+
+.cart-trust-badges .payment-icon {
+    width: 32px;
+    height: 20px;
+}
+
+.cart-trust-badges .secure-text {
+    font-size: 0.625rem;
+}
+
 .hero-price-context {
     display: flex;
     justify-content: center;

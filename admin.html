@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | Zero Lines Promo Codes</title>
+    <title>Admin Panel | Zero Lines</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -305,6 +305,238 @@
             opacity: 0.3;
         }
 
+        /* Custom Deal Creator */
+        .deal-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .deal-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .deal-section .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .price-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .price-slider-wrap input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--border-subtle);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .price-slider-wrap input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-turquoise);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid var(--bg-primary);
+            box-shadow: 0 2px 8px rgba(10, 186, 181, 0.3);
+        }
+
+        .price-display {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-turquoise);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .gift-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .gift-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 0.875rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .gift-checkbox:hover {
+            border-color: var(--accent-turquoise);
+        }
+
+        .gift-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-turquoise);
+            cursor: pointer;
+        }
+
+        .gift-checkbox.checked {
+            background: rgba(10, 186, 181, 0.08);
+            border-color: rgba(10, 186, 181, 0.3);
+            color: var(--text-primary);
+        }
+
+        .deal-preview {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deal-preview h3 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.9375rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .preview-row:last-child {
+            border-bottom: none;
+        }
+
+        .preview-row .label {
+            color: var(--text-muted);
+        }
+
+        .preview-row .value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .preview-row.total {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--accent-turquoise);
+            padding-top: 0.75rem;
+            margin-top: 0.25rem;
+            border-top: 1px dashed var(--border-medium);
+        }
+
+        .qr-area {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .qr-area.visible {
+            display: block;
+        }
+
+        .qr-area h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .qr-actions .btn {
+            font-size: 0.8125rem;
+            padding: 0.625rem 1.25rem;
+        }
+
+        .offer-url {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            word-break: break-all;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.25rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-secondary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-turquoise);
+            border-bottom-color: var(--accent-turquoise);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
         @media (max-width: 640px) {
             .stats-row {
                 grid-template-columns: 1fr;
@@ -323,6 +555,15 @@
             .code-table th,
             .code-table td {
                 padding: 0.75rem 0.5rem;
+            }
+            .gift-grid {
+                grid-template-columns: 1fr;
+            }
+            .qr-actions {
+                flex-direction: column;
+            }
+            .qr-actions .btn {
+                width: 100%;
             }
         }
     </style>
@@ -358,48 +599,144 @@
             </div>
         </div>
 
-        <div class="form-section">
-            <h2>Create New Promo Code</h2>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Promo Code</label>
-                    <input type="text" id="code-input" placeholder="e.g. SARAH50">
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="promos">Promo Codes</button>
+            <button class="tab-btn" data-tab="deals">Custom Deals</button>
+        </div>
+
+        <div class="tab-panel active" id="tab-promos">
+            <div class="form-section">
+                <h2>Create New Promo Code</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Promo Code</label>
+                        <input type="text" id="code-input" placeholder="e.g. SARAH50">
+                    </div>
+                    <div class="form-group">
+                        <label>Discount Type</label>
+                        <select id="type-input">
+                            <option value="percent">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (€)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Discount Value</label>
+                        <input type="number" id="value-input" placeholder="e.g. 20" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Salesperson Name</label>
+                        <input type="text" id="salesperson-input" placeholder="e.g. Sarah Johnson">
+                    </div>
+                    <div class="form-group full">
+                        <label>Notes (optional)</label>
+                        <input type="text" id="notes-input" placeholder="Any additional info...">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Discount Type</label>
-                    <select id="type-input">
-                        <option value="percent">Percentage (%)</option>
-                        <option value="fixed">Fixed Amount (€)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Discount Value</label>
-                    <input type="number" id="value-input" placeholder="e.g. 20" min="1">
-                </div>
-                <div class="form-group">
-                    <label>Salesperson Name</label>
-                    <input type="text" id="salesperson-input" placeholder="e.g. Sarah Johnson">
-                </div>
-                <div class="form-group full">
-                    <label>Notes (optional)</label>
-                    <input type="text" id="notes-input" placeholder="Any additional info...">
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="create-btn">Create Code</button>
+                    <div class="message" id="form-message"></div>
                 </div>
             </div>
-            <div class="form-actions">
-                <button class="btn btn-primary" id="create-btn">Create Code</button>
-                <div class="message" id="form-message"></div>
+
+            <div class="table-section">
+                <h2>Active Promo Codes</h2>
+                <div id="codes-list">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        <p>No promo codes yet. Create one above.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="table-section">
-            <h2>Active Promo Codes</h2>
-            <div id="codes-list">
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                    </svg>
-                    <p>No promo codes yet. Create one above.</p>
+        <div class="tab-panel" id="tab-deals">
+            <div class="deal-section">
+                <h2>Create Custom Deal</h2>
+                <p class="subtitle">Build a personalised offer for your customer. Set any price from €100–€300 and add free gifts.</p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Your Name (Seller)</label>
+                        <input type="text" id="deal-seller" placeholder="e.g. Maria">
+                    </div>
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <input type="text" id="deal-customer" placeholder="e.g. Juana">
+                    </div>
+                    <div class="form-group">
+                        <label>Units</label>
+                        <input type="number" id="deal-units" value="1" min="1" max="5">
+                    </div>
+                    <div class="form-group">
+                        <label>Custom Price (€)</label>
+                        <div class="price-slider-wrap">
+                            <input type="range" id="deal-price-slider" min="100" max="300" value="300" step="5">
+                            <span class="price-display" id="deal-price-display">€300</span>
+                        </div>
+                    </div>
+                    <div class="form-group full">
+                        <label>Free Gifts</label>
+                        <div class="gift-grid" id="deal-gifts">
+                            <label class="gift-checkbox"><input type="checkbox" value="day-cream"> Crema de Día</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="night-cream"> Crema de Noche</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="facial-serum"> Sérum Facial</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="eye-serum"> Sérum de Ojos</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="eye-cream"> Contorno de Ojos</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="facial-peel"> Peeling Facial</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="body-scrub"> Exfoliante Corporal</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="body-butter"> Mantequilla Corporal</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="nail-kit"> Kit de Uñas</label>
+                            <label class="gift-checkbox"><input type="checkbox" value="facial-cleanser"> Limpiador Facial</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Expires In</label>
+                        <select id="deal-expiry">
+                            <option value="30">30 minutes</option>
+                            <option value="60">1 hour</option>
+                            <option value="120" selected>2 hours</option>
+                            <option value="240">4 hours</option>
+                            <option value="1440">24 hours</option>
+                            <option value="custom">Custom date/time</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="deal-custom-expiry-wrap" style="display:none;">
+                        <label>Custom Expiry</label>
+                        <input type="datetime-local" id="deal-custom-expiry">
+                    </div>
+                    <div class="form-group full">
+                        <label>Note (optional)</label>
+                        <input type="text" id="deal-note" placeholder="e.g. Special demo day offer">
+                    </div>
+                </div>
+
+                <div class="deal-preview" id="deal-preview">
+                    <h3>Preview</h3>
+                    <div class="preview-row"><span class="label">Customer</span><span class="value" id="preview-customer">—</span></div>
+                    <div class="preview-row"><span class="label">Units</span><span class="value" id="preview-units">1</span></div>
+                    <div class="preview-row"><span class="label">Regular Price</span><span class="value" id="preview-regular">€300</span></div>
+                    <div class="preview-row"><span class="label">Your Price</span><span class="value" id="preview-price">€300</span></div>
+                    <div class="preview-row"><span class="label">Gifts</span><span class="value" id="preview-gifts">None</span></div>
+                    <div class="preview-row total"><span class="label">Customer Saves</span><span class="value" id="preview-savings">€0</span></div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="deal-generate">Generate Offer</button>
+                    <div class="message" id="deal-message"></div>
+                </div>
+
+                <div class="qr-area" id="qr-area">
+                    <h3>Scan to Claim</h3>
+                    <div id="qrcode"></div>
+                    <div class="qr-actions">
+                        <button class="btn btn-primary" id="deal-copy">Copy Link</button>
+                        <button class="btn" id="deal-print" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);">Print</button>
+                        <button class="btn" id="deal-reset" style="background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-subtle);">New Deal</button>
+                    </div>
+                    <div class="offer-url" id="offer-url"></div>
                 </div>
             </div>
         </div>
@@ -562,6 +899,207 @@
         renderCodes();
 
         console.log('🔐 Zero Lines Admin Panel Loaded');
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+            });
+        });
+
+        // ============================================
+        // CUSTOM DEAL CREATOR
+        // ============================================
+        const REGULAR_PRICE = 300;
+        const BASE_URL = window.location.origin + window.location.pathname.replace('admin.html', '') + 'offer.html';
+
+        const dealSeller = document.getElementById('deal-seller');
+        const dealCustomer = document.getElementById('deal-customer');
+        const dealUnits = document.getElementById('deal-units');
+        const dealPriceSlider = document.getElementById('deal-price-slider');
+        const dealPriceDisplay = document.getElementById('deal-price-display');
+        const dealExpiry = document.getElementById('deal-expiry');
+        const dealCustomExpiryWrap = document.getElementById('deal-custom-expiry-wrap');
+        const dealCustomExpiry = document.getElementById('deal-custom-expiry');
+        const dealNote = document.getElementById('deal-note');
+        const dealGiftInputs = document.querySelectorAll('#deal-gifts input');
+        const dealPreview = document.getElementById('deal-preview');
+        const qrArea = document.getElementById('qr-area');
+        const qrcodeDiv = document.getElementById('qrcode');
+        const offerUrlDiv = document.getElementById('offer-url');
+
+        let currentQR = null;
+
+        // Update price display on slider change
+        dealPriceSlider.addEventListener('input', () => {
+            dealPriceDisplay.textContent = '€' + dealPriceSlider.value;
+            updatePreview();
+        });
+
+        // Show/hide custom expiry input
+        dealExpiry.addEventListener('change', () => {
+            dealCustomExpiryWrap.style.display = dealExpiry.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Gift checkbox styling
+        document.querySelectorAll('.gift-checkbox').forEach(label => {
+            const cb = label.querySelector('input');
+            cb.addEventListener('change', () => {
+                label.classList.toggle('checked', cb.checked);
+                updatePreview();
+            });
+        });
+
+        // Update preview
+        function updatePreview() {
+            const units = parseInt(dealUnits.value) || 1;
+            const price = parseInt(dealPriceSlider.value) || 300;
+            const totalRegular = REGULAR_PRICE * units;
+            const totalCustom = price * units;
+            const savings = totalRegular - totalCustom;
+
+            const gifts = Array.from(dealGiftInputs)
+                .filter(cb => cb.checked)
+                .map(cb => cb.parentElement.textContent.trim());
+
+            document.getElementById('preview-customer').textContent = dealCustomer.value || '—';
+            document.getElementById('preview-units').textContent = units;
+            document.getElementById('preview-regular').textContent = '€' + totalRegular;
+            document.getElementById('preview-price').textContent = '€' + totalCustom;
+            document.getElementById('preview-gifts').textContent = gifts.length > 0 ? gifts.join(', ') : 'None';
+            document.getElementById('preview-savings').textContent = '€' + savings;
+            document.getElementById('preview-savings').style.color = savings > 0 ? 'var(--accent-turquoise)' : 'var(--text-muted)';
+        }
+
+        [dealSeller, dealCustomer, dealUnits, dealNote].forEach(el => {
+            el.addEventListener('input', updatePreview);
+        });
+
+        // Generate offer
+        document.getElementById('deal-generate').addEventListener('click', () => {
+            const seller = dealSeller.value.trim();
+            const customer = dealCustomer.value.trim();
+            const units = parseInt(dealUnits.value) || 1;
+            const price = parseInt(dealPriceSlider.value) || 300;
+            const note = dealNote.value.trim();
+
+            if (!seller) {
+                showDealMessage('Please enter your name', 'error');
+                return;
+            }
+
+            // Calculate expiry
+            let expiryDate;
+            if (dealExpiry.value === 'custom') {
+                if (!dealCustomExpiry.value) {
+                    showDealMessage('Please select a custom expiry date', 'error');
+                    return;
+                }
+                expiryDate = new Date(dealCustomExpiry.value);
+            } else {
+                const minutes = parseInt(dealExpiry.value);
+                expiryDate = new Date(Date.now() + minutes * 60 * 1000);
+            }
+
+            const gifts = Array.from(dealGiftInputs)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            const offer = {
+                seller,
+                customer: customer || 'Usted',
+                units,
+                price,
+                gifts,
+                expires: expiryDate.toISOString(),
+                note,
+                created: new Date().toISOString(),
+            };
+
+            const encoded = btoa(JSON.stringify(offer));
+            const offerURL = BASE_URL + '?d=' + encoded;
+
+            // Show QR
+            qrArea.classList.add('visible');
+            qrcodeDiv.innerHTML = '';
+            currentQR = new QRCode(qrcodeDiv, {
+                text: offerURL,
+                width: 200,
+                height: 200,
+                colorDark: '#0a0a0a',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M,
+            });
+
+            offerUrlDiv.textContent = offerURL;
+            showDealMessage('Offer generated successfully!', 'success');
+
+            // Scroll to QR
+            qrArea.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Copy link
+        document.getElementById('deal-copy').addEventListener('click', async () => {
+            const url = offerUrlDiv.textContent;
+            if (!url) return;
+            try {
+                await navigator.clipboard.writeText(url);
+                showDealMessage('Link copied to clipboard!', 'success');
+            } catch {
+                showDealMessage('Could not copy link', 'error');
+            }
+        });
+
+        // Print
+        document.getElementById('deal-print').addEventListener('click', () => {
+            const url = offerUrlDiv.textContent;
+            if (!url) return;
+            const printWindow = window.open(url, '_blank');
+            if (printWindow) {
+                printWindow.addEventListener('load', () => {
+                    printWindow.print();
+                });
+            }
+        });
+
+        // Reset
+        document.getElementById('deal-reset').addEventListener('click', () => {
+            dealSeller.value = '';
+            dealCustomer.value = '';
+            dealUnits.value = '1';
+            dealPriceSlider.value = '300';
+            dealPriceDisplay.textContent = '€300';
+            dealExpiry.value = '120';
+            dealCustomExpiryWrap.style.display = 'none';
+            dealCustomExpiry.value = '';
+            dealNote.value = '';
+            dealGiftInputs.forEach(cb => {
+                cb.checked = false;
+                cb.parentElement.classList.remove('checked');
+            });
+            qrArea.classList.remove('visible');
+            qrcodeDiv.innerHTML = '';
+            offerUrlDiv.textContent = '';
+            updatePreview();
+        });
+
+        function showDealMessage(msg, type) {
+            const el = document.getElementById('deal-message');
+            el.textContent = msg;
+            el.className = `message ${type}`;
+            setTimeout(() => { el.className = 'message'; }, 3000);
+        }
+
+        // Initialize preview
+        updatePreview();
+
+        console.log('🎁 Zero Lines Custom Deal Creator Loaded');
     </script>
 </body>
 </html>
