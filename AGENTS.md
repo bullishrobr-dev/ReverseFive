@@ -1,4 +1,4 @@
-# Yubari King — Agent Context
+# Reverse Five — Agent Context
 
 > **For coding agents:** Read this file at the start of every session. Update it when you change workflows, tech stack, or project conventions.
 
@@ -6,12 +6,12 @@
 
 ## Project Overview
 
-**Yubari King Wrinkle Eraser** is a premium single-page product landing page for Zero Lines (Gibraltar). It sells a £300 non-injectable skin correction treatment by Hermetise Professional.
+**Reverse Five Wrinkle Eraser** is a premium single-page product landing page for Zero Lines (Andorra). It sells a €300 non-injectable skin correction treatment by Opatra London.
 
 - **Target market:** International (16 languages)
-- **Price point:** Premium (£300 GBP)
+- **Price point:** Premium (€300 EUR)
 - **Brand identity:** Dark, luxurious, medical-aesthetic feel
-- **Primary domain:** `zerolines.life` (Gibraltar-based)
+- **Primary domain:** `zerolines.life` (Andorra-based)
 
 ---
 
@@ -23,7 +23,7 @@
 | **Styling** | Vanilla CSS (`css/style.css`) — no frameworks |
 | **Scripting** | Vanilla JS (`js/app.js`) — no frameworks |
 | **Animation** | GSAP + ScrollTrigger (CDN), Lenis smooth scroll (CDN) |
-| **Backend (optional)** | Cloudflare Worker (`api/yubari-king-worker.js`) |
+| **Backend (optional)** | Cloudflare Worker (`api/reverse-five-worker.js`) |
 | **Forms** | Formspree (free tier) — **placeholders in code** |
 | **Analytics** | Google Analytics 4 + Meta Pixel — **placeholders in code** |
 | **Hosting** | TBD (likely GitHub Pages or Cloudflare Pages) |
@@ -39,10 +39,10 @@
 ├── admin.html              # Promo code manager (localStorage-based admin panel)
 ├── css/style.css           # All styles (~4500+ lines)
 ├── js/app.js               # All logic (~4600+ lines)
-├── api/yubari-king-worker.js   # Cloudflare Worker for server-side validation
+├── api/reverse-five-worker.js   # Cloudflare Worker for server-side validation
 ├── SETUP.md                # Detailed setup guide for integrations
 ├── assets/                 # Images, logos, before/after photos
-│   ├── yubari-king.PNG     # Product hero image
+│   ├── reverse-five.PNG     # Product hero image
 │   ├── zerolines-logo.png  # Brand logo
 │   ├── lady.webp           # Face diagram for "Where to Apply"
 │   ├── result1-6.png       # Edited before/after photos
@@ -63,12 +63,12 @@ All 16 language translations live inside `js/app.js` as a single `translations` 
 **Supported languages:** EN, ES, FR, DE, PT, DA, PL, RU, IT, NL, SV, JA, KO, ZH, AR (RTL), EL
 
 ### 3. Client-Side State (localStorage)
-- Cart persistence: `yubariCart`
-- Theme preference: `yubariTheme`
-- Promo codes: `yubariPromoCodes` (shared between site and admin panel)
-- Promo usage tracking: `yubariPromoUsage`
-- Applied promo: `yubariPromo`
-- Reviews (pending): `yubariPendingReviews`
+- Cart persistence: `reverseCart`
+- Theme preference: `reverseTheme`
+- Promo codes: `reversePromoCodes` (shared between site and admin panel)
+- Promo usage tracking: `reversePromoUsage`
+- Applied promo: `reversePromo`
+- Reviews (pending): `reversePendingReviews`
 
 ### 4. Cart Is Frontend-Only
 There is no real checkout. The "Checkout" button opens an alert with order summary + contact details (WhatsApp/email). Stripe integration is mentioned but not implemented.
@@ -140,7 +140,7 @@ See `SETUP.md` for detailed integration instructions.
 ### 2026-05-19 — Git Setup + AGENTS.md
 - Initialized Git repository
 - Created `.gitignore` (excludes `.DS_Store`, screenshots, backup HTML files)
-- Pushed to `https://github.com/bullishrobr-dev/YubariKing.git`
+- Pushed to `https://github.com/bullishrobr-dev/ReverseFive.git`
 - Created this `AGENTS.md`
 
 ---
@@ -191,4 +191,4 @@ wrangler deploy
 
 - **Owner:** bullishrobr-dev (GitHub)
 - **Brand:** Zero Lines — info@zerolines.life — +350 5400 5198
-- **Repo:** https://github.com/bullishrobr-dev/YubariKing.git
+- **Repo:** https://github.com/bullishrobr-dev/ReverseFive.git

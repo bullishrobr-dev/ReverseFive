@@ -1,5 +1,5 @@
 /**
- * Yubari King — Server-Side API Worker
+ * Reverse Five — Server-Side API Worker
  * Deploy to Cloudflare Workers
  * 
  * Endpoints:
@@ -200,7 +200,7 @@ function getDefaultReviews() {
       name: 'Elena K.',
       email: '',
       rating: 5,
-      text: "I've tried countless serums and creams over the years. Yubari King is the only product that has delivered a noticeable, lasting difference. The protocol is easy to follow and I love that it's just once a week.",
+      text: "I've tried countless serums and creams over the years. Reverse Five is the only product that has delivered a noticeable, lasting difference. The protocol is easy to follow and I love that it's just once a week.",
       date: '2026-02-28T00:00:00Z',
       approved: true,
     },
@@ -268,8 +268,8 @@ async function sendNotificationEmail(env, subject, body) {
  * - NOTIFICATION_EMAIL: Email to receive notifications
  * 
  * wrangler.toml example:
- * name = "yubari-king-api"
- * main = "api/yubari-king-worker.js"
+ * name = "reverse-five-api"
+ * main = "api/reverse-five-worker.js"
  * compatibility_date = "2024-01-01"
  * 
  * [[kv_namespaces]]

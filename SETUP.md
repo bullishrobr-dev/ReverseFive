@@ -1,4 +1,4 @@
-# Yubari King — Setup Guide
+# Reverse Five — Setup Guide
 
 This document explains what was built and what you need to configure.
 
@@ -19,7 +19,7 @@ This document explains what was built and what you need to configure.
 
 ### 3. Mobile Sticky CTA Bar
 - Fixed bottom bar on mobile (≤768px) that appears after scrolling past the hero
-- Shows price (£300) + "Free Shipping" + "Add to Cart" button
+- Shows price (€300) + "Free Shipping" + "Add to Cart" button
 - Smooth show/hide animation
 
 ### 4. Proper Contact Form
@@ -70,7 +70,7 @@ This document explains what was built and what you need to configure.
 - Shows all content immediately without scroll reveals
 
 ### 14. Server-Side Validation Worker
-- Created `api/yubari-king-worker.js` — a Cloudflare Worker script
+- Created `api/reverse-five-worker.js` — a Cloudflare Worker script
 - Validates promo codes server-side (prevents client-side hacking)
 - Stores reviews and contact submissions in Cloudflare KV
 - Includes deployment instructions in the file comments
@@ -138,5 +138,5 @@ New language keys were batch-translated via Google Translate. They may benefit f
 | `index.html` | +~200 lines: Reviews section, trust badges, contact form, newsletter, footer grid, mobile sticky CTA, lazy loading, JSON-LD, analytics |
 | `css/style.css` | +~450 lines: All new section styles, RTL overrides, reduced motion, responsive breakpoints |
 | `js/app.js` | +~300 lines: Reviews system, mobile CTA, contact form, newsletter, analytics, RTL, reduced motion, FAQ schema |
-| `api/yubari-king-worker.js` | New: Cloudflare Worker for server-side validation |
+| `api/reverse-five-worker.js` | New: Cloudflare Worker for server-side validation |
 | `SETUP.md` | New: This file |

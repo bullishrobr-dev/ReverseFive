@@ -1,5 +1,5 @@
 /* ============================================
-   ZERO LINES — YUBARI KING
+   ZERO LINES — REVERSE FIVE
    Premium Dark-First Design System
    ============================================ */
 
@@ -100,6 +100,14 @@ body[data-theme="light"] .hero::before {
 
 body[data-theme="light"] .product-glow {
     background: radial-gradient(circle, rgba(8, 158, 154, 0.1) 0%, transparent 70%);
+}
+
+body[data-theme="light"] .product-card {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
 }
 
 body[data-theme="light"] .tag {
@@ -1070,6 +1078,10 @@ body[data-theme="light"] .theme-icon-moon {
     margin-bottom: 0.5rem;
     color: var(--text-primary);
     letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-turquoise) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .hero-title .line {
@@ -1256,21 +1268,68 @@ body[data-theme="light"] .hero-guarantee {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 500px;
+    min-height: 420px;
+}
+
+/* Animated background orbs */
+.hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hero-orb-1 {
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(10, 186, 181, 0.18) 0%, transparent 70%);
+    top: 20%;
+    left: 10%;
+    animation: orbFloat 8s ease-in-out infinite;
+}
+
+.hero-orb-2 {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+    bottom: 15%;
+    right: 15%;
+    animation: orbFloat 10s ease-in-out infinite reverse;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(20px, -15px) scale(1.05); }
+    66% { transform: translate(-10px, 10px) scale(0.95); }
 }
 
 .product-float {
     position: relative;
     z-index: 2;
+    perspective: 1000px;
+    transform-style: preserve-3d;
 }
 
+@keyframes productFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-16px); }
+}
 
 .product-image {
-    max-width: 220px;
+    max-width: 520px;
+    width: 100%;
     height: auto;
-    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.45));
     position: relative;
     z-index: 2;
+    animation: productFloat 5s ease-in-out infinite;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    will-change: transform;
+}
+
+.product-float:hover .product-image {
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.6));
 }
 
 .product-glow {
@@ -1278,28 +1337,30 @@ body[data-theme="light"] .hero-guarantee {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(10, 186, 181, 0.15) 0%, rgba(10, 186, 181, 0.05) 40%, transparent 70%);
+    width: 500px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(10, 186, 181, 0.12) 0%, rgba(10, 186, 181, 0.04) 50%, transparent 70%);
     pointer-events: none;
     z-index: 1;
 }
 
-/* Frosted-glass product card — grounds the product visually */
-.product-card {
+.product-reflection {
     position: absolute;
-    top: 50%;
+    bottom: -30px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 320px;
-    height: 420px;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transform: translateX(-50%) scaleY(-0.25);
+    width: 80%;
+    height: 60px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.15), transparent);
+    filter: blur(8px);
+    border-radius: 50%;
     pointer-events: none;
+    z-index: 0;
+}
+
+/* Frosted-glass product card — hidden, legacy element */
+.product-card {
+    display: none;
     z-index: 0;
 }
 
@@ -2545,13 +2606,18 @@ body[data-theme="light"] .stats-disclaimer-box {
     }
     
     .product-image {
-        max-width: 260px;
+        max-width: 420px;
     }
     
     .hero-visual {
         order: 1;
-        min-height: 320px;
+        min-height: 280px;
         margin-top: -1rem;
+    }
+    
+    .hero-orb-1,
+    .hero-orb-2 {
+        opacity: 0.6;
     }
     
     .hero-inner {
@@ -2766,20 +2832,16 @@ body[data-theme="light"] .stats-disclaimer-box {
     }
     
     .product-image {
-        max-width: 220px;
+        max-width: 340px;
     }
     
     .product-glow {
-        width: 280px;
-        height: 280px;
+        width: 350px;
+        height: 220px;
     }
     
     .product-card {
         display: none;
-    }
-    
-    .product-image {
-        max-width: 200px;
     }
     
     .hero-stamp-track {
@@ -7942,7 +8004,7 @@ body[data-theme="light"] .hero-pill {
     padding: 2.5rem;
 }
 
-.comparison-checklist-card.yubari {
+.comparison-checklist-card.reverse {
     border-color: rgba(10, 186, 181, 0.2);
     background: linear-gradient(145deg, var(--bg-card) 0%, rgba(10, 186, 181, 0.03) 100%);
 }
@@ -7957,7 +8019,7 @@ body[data-theme="light"] .hero-pill {
     color: var(--text-primary);
 }
 
-.comparison-checklist-card.yubari h3 {
+.comparison-checklist-card.reverse h3 {
     color: var(--accent-turquoise);
     border-color: rgba(10, 186, 181, 0.15);
 }
@@ -7991,7 +8053,7 @@ body[data-theme="light"] .hero-pill {
     margin-top: 1px;
 }
 
-.comparison-checklist-card.yubari ul li .check-icon {
+.comparison-checklist-card.reverse ul li .check-icon {
     background: rgba(10, 186, 181, 0.12);
     color: var(--accent-turquoise);
 }

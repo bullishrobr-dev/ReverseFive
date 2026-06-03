@@ -353,7 +353,7 @@
                 <div class="label">Total Uses</div>
             </div>
             <div class="stat-box">
-                <div class="number" id="stat-total-revenue">£0</div>
+                <div class="number" id="stat-total-revenue">€0</div>
                 <div class="label">Revenue Tracked</div>
             </div>
         </div>
@@ -369,7 +369,7 @@
                     <label>Discount Type</label>
                     <select id="type-input">
                         <option value="percent">Percentage (%)</option>
-                        <option value="fixed">Fixed Amount (£)</option>
+                        <option value="fixed">Fixed Amount (€)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -407,15 +407,15 @@
 
     <script>
         // Load data
-        let promoCodes = JSON.parse(localStorage.getItem('yubariPromoCodes')) || {};
-        let promoUsage = JSON.parse(localStorage.getItem('yubariPromoUsage')) || {};
+        let promoCodes = JSON.parse(localStorage.getItem('reversePromoCodes')) || {};
+        let promoUsage = JSON.parse(localStorage.getItem('reversePromoUsage')) || {};
 
         function saveCodes() {
-            localStorage.setItem('yubariPromoCodes', JSON.stringify(promoCodes));
+            localStorage.setItem('reversePromoCodes', JSON.stringify(promoCodes));
         }
 
         function saveUsage() {
-            localStorage.setItem('yubariPromoUsage', JSON.stringify(promoUsage));
+            localStorage.setItem('reversePromoUsage', JSON.stringify(promoUsage));
         }
 
         function showMessage(msg, type) {
@@ -438,7 +438,7 @@
 
             document.getElementById('stat-total-codes').textContent = codes.length;
             document.getElementById('stat-total-uses').textContent = totalUses;
-            document.getElementById('stat-total-revenue').textContent = `£${totalRevenue}`;
+            document.getElementById('stat-total-revenue').textContent = `€${totalRevenue}`;
         }
 
         function renderCodes() {
@@ -476,7 +476,7 @@
             codes.forEach(code => {
                 const promo = promoCodes[code];
                 const usage = promoUsage[code] || { count: 0, revenue: 0 };
-                const discountLabel = promo.type === 'percent' ? `${promo.value}% OFF` : `£${promo.value} OFF`;
+                const discountLabel = promo.type === 'percent' ? `${promo.value}% OFF` : `€${promo.value} OFF`;
 
                 html += `
                     <tr>
@@ -484,7 +484,7 @@
                         <td class="discount-cell">${discountLabel}</td>
                         <td class="salesperson-cell">${promo.salesperson || '-'}</td>
                         <td class="usage-cell">${usage.count}</td>
-                        <td class="usage-cell">£${usage.revenue || 0}</td>
+                        <td class="usage-cell">€${usage.revenue || 0}</td>
                         <td>
                             <button class="btn btn-danger delete-btn" data-code="${code}">Delete</button>
                         </td>
