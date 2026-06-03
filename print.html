@@ -1,174 +1,151 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Receipt</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; }
         body {
-            width: 300px;
-            margin: 0 auto;
-            padding: 8px;
-            font-family: 'Courier New', monospace;
+            font-family: "Courier New", monospace;
             font-size: 13px;
-            line-height: 1.4;
+            line-height: 1.3;
             color: #000;
             background: #fff;
+            padding: 8px;
         }
-        .center { text-align: center; }
-        .bold { font-weight: bold; }
-        .big { font-size: 16px; }
-        .small { font-size: 11px; }
-        .dashed {
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: "Courier New", monospace;
+            font-size: 14px;
+            background: #000;
+            color: #fff;
             border: none;
-            border-top: 1px dashed #000;
-            margin: 6px 0;
+            cursor: pointer;
         }
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 1px 0; vertical-align: top; }
-        .logo-img {
-            width: 70px;
-            height: auto;
-            display: block;
-            margin: 0 auto 4px;
-        }
-        #qrcode {
-            width: 140px;
-            height: 140px;
-            margin: 4px auto;
-            display: block;
-        }
-        #qrcode img, #qrcode canvas {
-            width: 100% !important;
-            height: 100% !important;
-            display: block;
-        }
-        .spacer { height: 4px; }
         @media print {
-            body { margin: 0; padding: 4px; }
+            .btn { display: none; }
+            body { padding: 4px; }
         }
     </style>
 </head>
 <body>
-    <div class="center"><img src="assets/zerolines-logo.png" class="logo-img" alt="ZL"></div>
-    <div class="center bold big">ZERO LINES</div>
-    <div class="center small">Andorra</div>
-    <hr class="dashed">
+    <button class="btn" onclick="window.print()">PRINT RECEIPT</button>
+    <pre id="receipt"></pre>
+    <button class="btn" onclick="window.print()">PRINT RECEIPT</button>
 
-    <div class="center bold">OFERTA EXCLUSIVA</div>
-    <div class="spacer"></div>
-    <div class="center bold big" id="r-title">Oferta Especial</div>
-    <div class="center" id="r-customer">Para: Cliente</div>
-    <div class="spacer"></div>
-    <div class="center small" id="r-seller">Preparada por: Vendedor</div>
-    <hr class="dashed">
-
-    <div class="center bold">Reverse Five Wrinkle Eraser</div>
-    <div class="center small" id="r-product">1 unidad · 100 tratamientos · 2 a&ntilde;os</div>
-    <hr class="dashed">
-
-    <table>
-        <tr><td>Precio regular:</td><td class="center" id="r-regular" style="text-decoration:line-through;">€300</td></tr>
-        <tr class="bold big"><td>TU PRECIO:</td><td class="center" id="r-price">€175</td></tr>
-        <tr class="bold"><td>AHORRAS:</td><td class="center" id="r-savings">€125</td></tr>
-    </table>
-    <hr class="dashed">
-
-    <div id="r-gifts-section" style="display:none;">
-        <div class="center bold">REGALOS INCLUIDOS</div>
-        <div id="r-gifts-list"></div>
-        <hr class="dashed">
-    </div>
-
-    <div id="r-note-section" style="display:none;">
-        <div class="center small" id="r-note"></div>
-        <hr class="dashed">
-    </div>
-
-    <div class="center bold">ESCANEA PARA RECLAMAR</div>
-    <div id="qrcode"></div>
-    <hr class="dashed">
-
-    <div class="center small">Oferta expira:</div>
-    <div class="center bold" id="r-expiry">--</div>
-    <hr class="dashed">
-
-    <div class="center small">Gracias por su confianza</div>
-    <div class="center small">Zero Lines - Andorra</div>
-    <div class="center small">+350 5400 5198</div>
-    <div class="center small">info@zerolines.life</div>
-    <hr class="dashed">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
     (function() {
         function getOffer() {
-            const p = new URLSearchParams(location.search).get('d');
+            var p = new URLSearchParams(location.search).get('d');
             if (!p) return null;
             try { return JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/'))); }
             catch(e) { return null; }
         }
 
-        const giftNames = {
-            'day-cream':'Crema de Día','night-cream':'Crema de Noche',
-            'facial-serum':'Sérum Facial','eye-serum':'Sérum de Ojos',
-            'eye-cream':'Contorno de Ojos','facial-peel':'Peeling Facial',
-            'body-scrub':'Exfoliante Corporal','body-butter':'Mantequilla Corporal',
-            'nail-kit':'Kit de Uñas','facial-cleanser':'Limpiador Facial'
+        var giftNames = {
+            'day-cream':'Crema de Dia',
+            'night-cream':'Crema de Noche',
+            'facial-serum':'Serum Facial',
+            'eye-serum':'Serum de Ojos',
+            'eye-cream':'Contorno de Ojos',
+            'facial-peel':'Peeling Facial',
+            'body-scrub':'Exfoliante Corporal',
+            'body-butter':'Mantequilla Corporal',
+            'nail-kit':'Kit de Unas',
+            'facial-cleanser':'Limpiador Facial'
         };
 
-        const offer = getOffer();
+        var offer = getOffer();
         if (!offer) {
-            document.body.innerHTML = '<div class="center">Oferta no encontrada</div>';
+            document.getElementById('receipt').textContent = 'Oferta no encontrada';
             return;
         }
 
-        const units = offer.units || 1;
-        const regular = 300 * units;
-        const custom = offer.price * units;
-        const savings = regular - custom;
-        const expiry = new Date(offer.expires);
+        var units = offer.units || 1;
+        var regular = 300 * units;
+        var custom = offer.price * units;
+        var savings = regular - custom;
+        var expiry = new Date(offer.expires);
+        var gifts = offer.gifts || [];
 
-        document.getElementById('r-customer').textContent = 'Para: ' + (offer.customer || 'Usted');
-        document.getElementById('r-seller').textContent = 'Preparada por: ' + (offer.seller || 'Vendedor');
-        document.getElementById('r-product').textContent = units + ' unidad' + (units>1?'es':'') + ' · 100 tratamientos · 2 años';
-        document.getElementById('r-regular').textContent = '€' + regular;
-        document.getElementById('r-price').textContent = '€' + custom;
-        document.getElementById('r-savings').textContent = '€' + savings;
-        document.getElementById('r-expiry').textContent = expiry.toLocaleString('es-ES');
+        var lines = [];
+        lines.push('');
+        lines.push('       ZERO LINES');
+        lines.push('       ANDORRA');
+        lines.push('----------------------------');
+        lines.push('      OFERTA EXCLUSIVA');
+        lines.push('');
+        lines.push('      Oferta Especial');
+        lines.push('      Para: ' + (offer.customer || 'Usted'));
+        lines.push('');
+        lines.push('  Preparada por: ' + (offer.seller || 'Vendedor'));
+        lines.push('----------------------------');
+        lines.push('');
+        lines.push('   Reverse Five Wrinkle');
+        lines.push('        Eraser');
+        lines.push('');
+        lines.push('  ' + units + ' unidad' + (units > 1 ? 'es' : ''));
+        lines.push('  100 tratamientos - 2 anos');
+        lines.push('----------------------------');
+        lines.push('');
+        lines.push('Precio regular:     EUR ' + regular);
+        lines.push('TU PRECIO:          EUR ' + custom);
+        lines.push('AHORRAS:            EUR ' + savings);
+        lines.push('----------------------------');
+        lines.push('');
 
-        const gifts = offer.gifts || [];
         if (gifts.length > 0) {
-            document.getElementById('r-gifts-section').style.display = 'block';
-            const list = document.getElementById('r-gifts-list');
-            gifts.forEach(g => {
-                const div = document.createElement('div');
-                div.textContent = '+ ' + (giftNames[g] || g);
-                list.appendChild(div);
+            lines.push('REGALOS INCLUIDOS (' + gifts.length + ')');
+            lines.push('');
+            gifts.forEach(function(g) {
+                lines.push('+ ' + (giftNames[g] || g));
             });
+            lines.push('');
+            lines.push('----------------------------');
+            lines.push('');
         }
 
         if (offer.note) {
-            document.getElementById('r-note-section').style.display = 'block';
-            document.getElementById('r-note').textContent = '"' + offer.note + '"';
+            lines.push('"' + offer.note + '"');
+            lines.push('');
+            lines.push('----------------------------');
+            lines.push('');
         }
 
-        // Generate QR
-        new QRCode(document.getElementById('qrcode'), {
-            text: location.href,
-            width: 140,
-            height: 140,
-            colorDark: '#000',
-            colorLight: '#fff',
-            correctLevel: QRCode.CorrectLevel.M,
-        });
+        lines.push('RECLAMA TU OFERTA:');
+        lines.push('');
+        var url = location.href;
+        for (var i = 0; i < url.length; i += 28) {
+            lines.push(url.substring(i, i + 28));
+        }
+        lines.push('');
+        lines.push('----------------------------');
+        lines.push('');
+        lines.push('Oferta expira:');
+        lines.push(expiry.toLocaleString('es-ES'));
+        lines.push('');
+        lines.push('----------------------------');
+        lines.push('');
+        lines.push('Gracias por su confianza');
+        lines.push('Zero Lines - Andorra');
+        lines.push('+350 5400 5198');
+        lines.push('');
+        lines.push('============================');
+        lines.push('');
+        lines.push('');
+        lines.push('');
 
-        // Auto-print after QR renders
-        setTimeout(function() {
-            window.print();
-            // Auto-close after print dialog (optional)
-            setTimeout(function() { window.close(); }, 500);
-        }, 600);
+        document.getElementById('receipt').textContent = lines.join('\n');
     })();
     </script>
 </body>

@@ -1056,8 +1056,8 @@
             }
         });
 
-        // Print Receipt — opens a minimal receipt page that auto-prints
-        document.getElementById('deal-print').addEventListener('click', () => {
+        // Print Receipt — sends to local thermal print server
+        document.getElementById('deal-print').addEventListener('click', async () => {
             const url = offerUrlDiv.textContent;
             if (!url) return;
 
@@ -1065,17 +1065,38 @@
             const encoded = params.get('d');
             if (!encoded) return;
 
-            const printURL = window.location.origin + window.location.pathname.replace('admin.html', '') + 'print.html?d=' + encoded;
+            try {
+                const offer = JSON.parse(atob(encoded));
 
-            // Open small popup window sized for receipt preview
-            const printWindow = window.open(
-                printURL,
-                'receipt',
-                'width=340,height=700,top=50,left=50,scrollbars=yes,resizable=yes'
-            );
+                // Try to send to local print server first
+                try {
+                    const response = await fetch('http://127.0.0.1:8765/print', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(offer),
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showDealMessage('Receipt sent to printer!', 'success');
+                        return;
+                    }
+                } catch (e) {
+                    // Local server not running — fallback to browser print
+                }
 
-            if (!printWindow) {
-                showDealMessage('Popup blocked — please allow popups for this site', 'error');
+                // Fallback: open print.html popup
+                const printURL = window.location.origin + window.location.pathname.replace('admin.html', '') + 'print.html?d=' + encoded;
+                const printWindow = window.open(
+                    printURL,
+                    'receipt',
+                    'width=340,height=700,top=50,left=50,scrollbars=yes,resizable=yes'
+                );
+
+                if (!printWindow) {
+                    showDealMessage('Please start the print server or allow popups', 'error');
+                }
+            } catch (e) {
+                showDealMessage('Could not print receipt', 'error');
             }
         });
 
