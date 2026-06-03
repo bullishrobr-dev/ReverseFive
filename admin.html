@@ -733,7 +733,7 @@
                     <div id="qrcode"></div>
                     <div class="qr-actions">
                         <button class="btn btn-primary" id="deal-copy">Copy Link</button>
-                        <button class="btn" id="deal-print" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);">Print</button>
+                        <button class="btn" id="deal-print" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);">Download Receipt</button>
                         <button class="btn" id="deal-reset" style="background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-subtle);">New Deal</button>
                     </div>
                     <div class="offer-url" id="offer-url"></div>
@@ -901,6 +901,7 @@
         console.log('🔐 Zero Lines Admin Panel Loaded');
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/thermal-receipt.js"></script>
     <script>
         // ============================================
         // TAB SWITCHING
@@ -1056,18 +1057,23 @@
             }
         });
 
-        // Print
+        // Download Receipt Image (for thermal printer)
         document.getElementById('deal-print').addEventListener('click', () => {
             const url = offerUrlDiv.textContent;
             if (!url) return;
-            const printWindow = window.open(url, '_blank');
-            if (printWindow) {
-                printWindow.addEventListener('load', () => {
-                    // Wait for QR code to render before printing
-                    setTimeout(() => {
-                        printWindow.print();
-                    }, 800);
-                });
+
+            // Decode offer from URL to pass to receipt generator
+            const params = new URLSearchParams(new URL(url).search);
+            const encoded = params.get('d');
+            if (!encoded) return;
+
+            try {
+                const offer = JSON.parse(atob(encoded));
+                const filename = 'oferta-' + (offer.customer || 'cliente').toLowerCase().replace(/\s+/g, '-') + '.png';
+                ThermalReceipt.downloadReceipt(offer, filename);
+                showDealMessage('Receipt image downloading...', 'success');
+            } catch (e) {
+                showDealMessage('Could not generate receipt', 'error');
             }
         });
 
