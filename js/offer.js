@@ -188,6 +188,11 @@
                         o escríbenos por email
                     </a>
                 </div>
+                <div class="qr-area visible" style="margin-top:0;border-top:1px solid var(--border-subtle);">
+                    <h3>Escanea para reclamar</h3>
+                    <div id="qrcode"></div>
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">O visita este enlace desde tu móvil</p>
+                </div>
             </div>
         </div>
         `;
@@ -256,6 +261,20 @@
         }
 
         renderOffer(offer);
+
+        // Generate QR code for the current URL (so it appears in print)
+        const qrcodeDiv = document.getElementById('qrcode');
+        if (qrcodeDiv && typeof QRCode !== 'undefined') {
+            qrcodeDiv.innerHTML = '';
+            new QRCode(qrcodeDiv, {
+                text: window.location.href,
+                width: 160,
+                height: 160,
+                colorDark: '#0a0a0a',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M,
+            });
+        }
     }
 
     init();
