@@ -382,13 +382,14 @@ def print_raw(data, printer_name=PRINTER_NAME):
                 raise RuntimeError("Cannot start print page")
 
             try:
-                # Write data
+                # Write data using a proper buffer (handles null bytes correctly)
                 written = wintypes.DWORD()
-                c_data = ctypes.c_char_p(data)
+                buf = ctypes.create_string_buffer(data)
                 if not ctypes.windll.winspool.WritePrinter(
-                    hPrinter, c_data, len(data), ctypes.byref(written)
+                    hPrinter, buf, len(data), ctypes.byref(written)
                 ):
-                    raise RuntimeError("WritePrinter failed")
+                    err = ctypes.GetLastError()
+                    raise RuntimeError(f"WritePrinter failed. Error: {err}")
 
             finally:
                 ctypes.windll.winspool.EndPagePrinter(hPrinter)
@@ -529,6 +530,7 @@ def start_server(port=8765):
                 content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length).decode('utf-8')
 
+                import traceback
                 try:
                     offer = json.loads(post_data)
                     receipt_bytes = build_receipt(offer)
@@ -543,13 +545,18 @@ def start_server(port=8765):
                         'message': 'Receipt printed!'
                     }).encode())
                 except Exception as e:
+                    error_msg = str(e)
+                    tb = traceback.format_exc()
+                    print(f"[ERROR] {error_msg}")
+                    print(tb)
                     self.send_response(500)
                     self.send_header('Content-Type', 'application/json')
                     self.send_header('Access-Control-Allow-Origin', '*')
                     self.end_headers()
                     self.wfile.write(json.dumps({
                         'success': False,
-                        'error': str(e)
+                        'error': error_msg,
+                        'traceback': tb
                     }).encode())
             else:
                 self.send_response(404)
