@@ -336,6 +336,451 @@ def build_receipt_image(offer):
 
 
 # ============================================================
+# QUICK PRINTS RECEIPT BUILDERS
+# ============================================================
+
+def _qp_text_size(draw, text, font):
+    bbox = draw.textbbox((0, 0), text, font=font)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+
+def _qp_center(draw, y, text, font, width, color='black'):
+    tw, th = _qp_text_size(draw, text, font)
+    x = (width - tw) // 2
+    draw.text((x, y), text, font=font, fill=color)
+    return y + th
+
+
+def _qp_left(draw, y, text, font, width, margin=20, color='black'):
+    _, th = _qp_text_size(draw, text, font)
+    draw.text((margin, y), text, font=font, fill=color)
+    return y + th
+
+
+def _qp_wrap(draw, y, text, font, width, margin=20, align='left', color='black', spacing=2):
+    if not text:
+        return y
+    max_w = width - margin * 2
+    words = text.split()
+    lines = []
+    current = ''
+    for word in words:
+        test = current + ' ' + word if current else word
+        tw, _ = _qp_text_size(draw, test, font)
+        if tw <= max_w:
+            current = test
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+
+    for line in lines:
+        tw, th = _qp_text_size(draw, line, font)
+        if align == 'center':
+            x = (width - tw) // 2
+        elif align == 'right':
+            x = width - tw - margin
+        else:
+            x = margin
+        draw.text((x, y), line, font=font, fill=color)
+        y += th + spacing
+    return y
+
+
+def _qp_sep(draw, y, width, style='single'):
+    if style == 'double':
+        draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+        draw.line([(20, y + 4), (width - 20, y + 4)], fill='black', width=2)
+        return y + 12
+    elif style == 'light':
+        draw.line([(20, y), (width - 20, y)], fill='black', width=1)
+        return y + 8
+    else:
+        draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+        return y + 10
+
+
+def _qp_load_logo(shop, width):
+    """Load shop logo from base64 data or local file."""
+    logo_b64 = shop.get('logo', '') if shop else ''
+    if logo_b64:
+        try:
+            if ',' in logo_b64:
+                logo_b64 = logo_b64.split(',', 1)[1]
+            logo_data = base64.b64decode(logo_b64)
+            logo = Image.open(BytesIO(logo_data)).convert('RGBA')
+            logo_w = min(width - 40, 280)
+            ratio = logo_w / logo.width
+            logo_h = int(logo.height * ratio)
+            return logo.resize((logo_w, logo_h), Image.LANCZOS)
+        except Exception:
+            pass
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    for logo_name in ["logo.png", "logo.jpg", "zerolines-logo.png", "zerolines-logo.jpg"]:
+        logo_path = os.path.join(script_dir, logo_name)
+        if os.path.exists(logo_path):
+            try:
+                logo = Image.open(logo_path).convert('RGBA')
+                logo_w = min(width - 40, 280)
+                ratio = logo_w / logo.width
+                logo_h = int(logo.height * ratio)
+                return logo.resize((logo_w, logo_h), Image.LANCZOS)
+            except Exception:
+                pass
+    return None
+
+
+def _qp_draw_logo(img, y, shop, width):
+    """Paste logo at top of receipt. Returns new y."""
+    logo = _qp_load_logo(shop, width)
+    if logo:
+        x = (width - logo.width) // 2
+        img.paste(logo, (x, y), logo)
+        return y + logo.height + 15
+    return y
+
+
+def _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader):
+    if shop.get('name'):
+        y = _qp_center(draw, y, shop['name'], font_header, width)
+    if shop.get('tagline'):
+        y = _qp_center(draw, y, shop['tagline'], font_subheader, width)
+    return y
+
+
+def _qp_draw_worker(draw, y, width, worker, font_text, font_small, opts=None):
+    opts = opts or {}
+    if not worker:
+        return _qp_sep(draw, y, width)
+    y = _qp_sep(draw, y, width)
+    if worker.get('name'):
+        y = _qp_center(draw, y, worker['name'], font_text, width)
+    if worker.get('role'):
+        y = _qp_center(draw, y, worker['role'], font_small, width)
+    contacts = []
+    if opts.get('showEmail', True) and worker.get('email'):
+        contacts.append('Email: ' + worker['email'])
+    if opts.get('showPhone', True) and worker.get('phone'):
+        contacts.append('Phone: ' + worker['phone'])
+    if opts.get('showWhatsApp', True) and worker.get('whatsapp'):
+        contacts.append('WhatsApp: ' + worker['whatsapp'])
+    if contacts:
+        y = _qp_sep(draw, y, width, 'light')
+        for c in contacts:
+            y = _qp_center(draw, y, c, font_small, width)
+    return y
+
+
+def _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text):
+    if not shop:
+        return y
+    y = _qp_sep(draw, y, width, 'light')
+    locations = shop.get('locations', [])
+    if locations:
+        if len(locations) == 1:
+            loc = locations[0]
+            if loc.get('name'):
+                y = _qp_center(draw, y, loc['name'], font_text, width)
+            if loc.get('address'):
+                y = _qp_center(draw, y, loc['address'], font_small, width)
+        else:
+            y = _qp_center(draw, y, 'LOCATIONS', font_small, width)
+            for loc in locations:
+                addr = (loc.get('name') or '') + (' — ' if loc.get('name') and loc.get('address') else '') + (loc.get('address') or '')
+                if addr:
+                    y = _qp_center(draw, y, addr, font_small, width)
+    items = []
+    if shop.get('email'): items.append('Email: ' + shop['email'])
+    if shop.get('phone'): items.append('Phone: ' + shop['phone'])
+    if shop.get('whatsapp'): items.append('WhatsApp: ' + shop['whatsapp'])
+    if shop.get('website'): items.append('Web: ' + shop['website'])
+    if items:
+        y = _qp_sep(draw, y, width, 'light')
+        for item in items:
+            y = _qp_center(draw, y, item, font_small, width)
+    hours = shop.get('hours', {})
+    if hours:
+        days = []
+        day_names = {'mon': 'Mon', 'tue': 'Tue', 'wed': 'Wed', 'thu': 'Thu', 'fri': 'Fri', 'sat': 'Sat', 'sun': 'Sun'}
+        for key, label in day_names.items():
+            if hours.get(key):
+                days.append(f'{label}: {hours[key]}')
+        if days:
+            y = _qp_sep(draw, y, width, 'light')
+            y = _qp_center(draw, y, 'OPENING HOURS', font_small, width)
+            for day in days:
+                y = _qp_center(draw, y, day, font_small, width)
+    return y
+
+
+def _qp_resolve_placeholders(text, shop, worker):
+    if not text:
+        return text
+    text = text.replace('{shop_name}', shop.get('name', ''))
+    text = text.replace('{shop_tagline}', shop.get('tagline', ''))
+    text = text.replace('{shop_email}', shop.get('email', ''))
+    text = text.replace('{shop_phone}', shop.get('phone', ''))
+    text = text.replace('{shop_whatsapp}', shop.get('whatsapp', ''))
+    text = text.replace('{shop_website}', shop.get('website', ''))
+    if worker:
+        text = text.replace('{worker_name}', worker.get('name', ''))
+        text = text.replace('{worker_role}', worker.get('role', ''))
+        text = text.replace('{worker_phone}', worker.get('phone', ''))
+        text = text.replace('{worker_email}', worker.get('email', ''))
+        text = text.replace('{worker_whatsapp}', worker.get('whatsapp', ''))
+    else:
+        for key in ['{worker_name}', '{worker_role}', '{worker_phone}', '{worker_email}', '{worker_whatsapp}']:
+            text = text.replace(key, '')
+    locs = shop.get('locations', [])
+    loc_text = '\n'.join([f"{(l.get('name') or '')}{(' — ' if l.get('name') and l.get('address') else '')}{(l.get('address') or '')}".strip(' — ') for l in locs])
+    text = text.replace('{locations}', loc_text)
+    hours = shop.get('hours', {})
+    hours_text = '\n'.join([f'{k}: {v}' for k, v in hours.items() if v])
+    text = text.replace('{hours}', hours_text)
+    return text
+
+
+def _qp_finish_receipt(img, width, y):
+    receipt = img.crop((0, 0, width, y + 20))
+    gray = receipt.convert('L')
+    bw = gray.point(lambda x: 0 if x < 200 else 255)
+    return bw.convert('RGB')
+
+
+def build_quick_prints_receipt(data):
+    """Build a receipt for Quick Prints based on template type."""
+    template = data.get('template', 'custom')
+    builders = {
+        'discount': build_qp_discount,
+        'businesscard': build_qp_businesscard,
+        'facial': build_qp_facial,
+        'skincare': build_qp_skincare,
+    }
+    builder = builders.get(template, build_qp_custom)
+    return builder(data)
+
+
+def build_qp_discount(data):
+    width = PAPER_WIDTH_DOTS
+    shop = data.get('shop', {})
+    worker = data.get('worker')
+    d = data.get('data', {})
+    font_header = load_font(32, bold=True)
+    font_subheader = load_font(22, bold=True)
+    font_title = load_font(20, bold=True)
+    font_text = load_font(18, bold=True)
+    font_small = load_font(14, bold=True)
+    font_highlight = load_font(36, bold=True)
+
+    img = Image.new('RGB', (width, 3000), 'white')
+    y = _qp_draw_logo(img, 30, shop, width)
+    draw = ImageDraw.Draw(img)
+
+    y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y = _qp_sep(draw, y, width, 'double')
+    if d.get('headline'):
+        y = _qp_center(draw, y, d['headline'].upper(), font_header, width)
+    y = _qp_sep(draw, y, width, 'double')
+    if d.get('code'):
+        y = _qp_center(draw, y, f"CODE: {d['code']}", font_text, width)
+    if d.get('percent'):
+        y = _qp_center(draw, y, f"• {d['percent']}% OFF •", font_highlight, width)
+    y = _qp_sep(draw, y, width)
+    if d.get('description'):
+        y = _qp_wrap(draw, y, d['description'], font_text, width, align='center')
+        y = _qp_sep(draw, y, width)
+    if d.get('redemption'):
+        y = _qp_wrap(draw, y, d['redemption'], font_small, width, align='center')
+        y = _qp_sep(draw, y, width)
+    if d.get('validUntil'):
+        y = _qp_center(draw, y, f"VALID UNTIL: {d['validUntil']}", font_text, width)
+        y = _qp_sep(draw, y, width)
+    y = _qp_draw_worker(draw, y, width, worker, font_text, font_small)
+    y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    if d.get('cta'):
+        y = _qp_sep(draw, y, width)
+        y = _qp_wrap(draw, y, d['cta'], font_text, width, align='center')
+        y = _qp_sep(draw, y, width)
+    if d.get('showFreeDelivery') and d.get('freeDeliveryCopy'):
+        y = _qp_wrap(draw, y, d['freeDeliveryCopy'], font_small, width, align='center')
+        y = _qp_sep(draw, y, width)
+    y = _qp_sep(draw, y, width, 'double')
+    return _qp_finish_receipt(img, width, y)
+
+
+def build_qp_businesscard(data):
+    width = PAPER_WIDTH_DOTS
+    shop = data.get('shop', {})
+    worker = data.get('worker')
+    d = data.get('data', {})
+    font_header = load_font(32, bold=True)
+    font_subheader = load_font(22, bold=True)
+    font_title = load_font(20, bold=True)
+    font_text = load_font(18, bold=True)
+    font_small = load_font(14, bold=True)
+    font_large = load_font(28, bold=True)
+
+    img = Image.new('RGB', (width, 3000), 'white')
+    y = _qp_draw_logo(img, 30, shop, width)
+    draw = ImageDraw.Draw(img)
+
+    y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y = _qp_sep(draw, y, width, 'double')
+    if d.get('tagline'):
+        y = _qp_center(draw, y, d['tagline'].upper(), font_title, width)
+    if d.get('role'):
+        y = _qp_center(draw, y, d['role'], font_text, width)
+    if worker and worker.get('name'):
+        y = _qp_center(draw, y, worker['name'], font_large, width)
+    y = _qp_sep(draw, y, width)
+    if d.get('notes'):
+        y = _qp_wrap(draw, y, d['notes'], font_text, width, align='center')
+        y = _qp_sep(draw, y, width)
+    opts = {'showEmail': d.get('showEmail', False), 'showPhone': d.get('showPhone', False), 'showWhatsApp': d.get('showWhatsApp', False)}
+    y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, opts)
+    y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    if d.get('cta'):
+        y = _qp_sep(draw, y, width)
+        y = _qp_wrap(draw, y, d['cta'], font_text, width, align='center')
+        y = _qp_sep(draw, y, width)
+    y = _qp_sep(draw, y, width, 'double')
+    return _qp_finish_receipt(img, width, y)
+
+
+def build_qp_facial(data):
+    width = PAPER_WIDTH_DOTS
+    shop = data.get('shop', {})
+    worker = data.get('worker')
+    d = data.get('data', {})
+    font_header = load_font(32, bold=True)
+    font_subheader = load_font(22, bold=True)
+    font_title = load_font(20, bold=True)
+    font_text = load_font(18, bold=True)
+    font_small = load_font(14, bold=True)
+
+    img = Image.new('RGB', (width, 3000), 'white')
+    y = _qp_draw_logo(img, 30, shop, width)
+    draw = ImageDraw.Draw(img)
+
+    y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y = _qp_sep(draw, y, width, 'double')
+    if d.get('headline'):
+        y = _qp_center(draw, y, d['headline'].upper(), font_header, width)
+    if d.get('subheadline'):
+        y = _qp_center(draw, y, d['subheadline'], font_subheader, width)
+    y = _qp_sep(draw, y, width)
+    if d.get('intro'):
+        y = _qp_wrap(draw, y, d['intro'], font_text, width)
+        y = _qp_sep(draw, y, width)
+    if d.get('benefits'):
+        y = _qp_center(draw, y, 'BENEFITS', font_title, width)
+        for line in d['benefits'].split('\n'):
+            line = line.strip()
+            if line:
+                y = _qp_left(draw, y, f'• {line}', font_text, width)
+        y = _qp_sep(draw, y, width)
+    if d.get('code'):
+        y = _qp_center(draw, y, f"CODE: {d['code']}", font_text, width)
+    if worker and worker.get('name'):
+        y = _qp_center(draw, y, f"Specialist: {worker['name']}", font_text, width)
+    y = _qp_sep(draw, y, width)
+    y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, {'showPhone': True, 'showWhatsApp': True})
+    y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    if d.get('closing'):
+        y = _qp_sep(draw, y, width)
+        y = _qp_wrap(draw, y, d['closing'], font_text, width, align='center')
+        y = _qp_sep(draw, y, width)
+    y = _qp_sep(draw, y, width, 'double')
+    return _qp_finish_receipt(img, width, y)
+
+
+def build_qp_skincare(data):
+    width = PAPER_WIDTH_DOTS
+    shop = data.get('shop', {})
+    worker = data.get('worker')
+    d = data.get('data', {})
+    font_header = load_font(32, bold=True)
+    font_subheader = load_font(22, bold=True)
+    font_title = load_font(20, bold=True)
+    font_text = load_font(18, bold=True)
+    font_small = load_font(14, bold=True)
+
+    img = Image.new('RGB', (width, 3000), 'white')
+    y = _qp_draw_logo(img, 30, shop, width)
+    draw = ImageDraw.Draw(img)
+
+    y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y = _qp_sep(draw, y, width, 'double')
+    y = _qp_center(draw, y, 'SKINCARE PLAN', font_header, width)
+    if d.get('product'):
+        y = _qp_center(draw, y, d['product'], font_subheader, width)
+    y = _qp_sep(draw, y, width)
+    if d.get('steps'):
+        y = _qp_center(draw, y, 'USAGE:', font_title, width)
+        step_num = 1
+        for line in d['steps'].split('\n'):
+            line = line.strip()
+            if line:
+                y = _qp_left(draw, y, f'{step_num}. {line}', font_text, width)
+                step_num += 1
+        y = _qp_sep(draw, y, width)
+    if d.get('frequency'):
+        y = _qp_left(draw, y, f"Frequency: {d['frequency']}", font_text, width)
+    if d.get('duration'):
+        y = _qp_left(draw, y, f"Duration: {d['duration']}", font_text, width)
+    if d.get('frequency') or d.get('duration'):
+        y = _qp_sep(draw, y, width)
+    if d.get('notes'):
+        y = _qp_sep(draw, y, width, 'light')
+        y = _qp_wrap(draw, y, d['notes'], font_small, width)
+        y = _qp_sep(draw, y, width)
+    if worker:
+        y = _qp_sep(draw, y, width)
+        y = _qp_center(draw, y, 'YOUR SPECIALIST', font_small, width)
+        if worker.get('name'):
+            y = _qp_center(draw, y, worker['name'], font_text, width)
+        if worker.get('role'):
+            y = _qp_center(draw, y, worker['role'], font_small, width)
+        y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, {'showPhone': True, 'showWhatsApp': True})
+    y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    y = _qp_sep(draw, y, width, 'double')
+    return _qp_finish_receipt(img, width, y)
+
+
+def build_qp_custom(data):
+    width = PAPER_WIDTH_DOTS
+    shop = data.get('shop', {})
+    worker = data.get('worker')
+    d = data.get('data', {})
+    font_header = load_font(32, bold=True)
+    font_subheader = load_font(22, bold=True)
+    font_text = load_font(18, bold=True)
+    font_small = load_font(14, bold=True)
+
+    img = Image.new('RGB', (width, 3000), 'white')
+    y = _qp_draw_logo(img, 30, shop, width)
+    draw = ImageDraw.Draw(img)
+
+    y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y = _qp_sep(draw, y, width)
+
+    content = d.get('content', '')
+    content = _qp_resolve_placeholders(content, shop, worker)
+    if content:
+        for para in content.split('\n\n'):
+            para = para.strip()
+            if para:
+                y = _qp_wrap(draw, y, para, font_text, width, align='center')
+                y = _qp_sep(draw, y, width, 'light')
+
+    y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    y = _qp_sep(draw, y, width, 'double')
+    return _qp_finish_receipt(img, width, y)
+
+
+# ============================================================
 # WINDOWS GDI PRINTER (ctypes - no pywin32 needed)
 # ============================================================
 def print_receipt_image(image, printer_name=PRINTER_NAME):
@@ -522,8 +967,12 @@ def start_server(port=8765):
 
                     # Build receipt image
                     print(f"[BUILD] Generating receipt image...")
-                    receipt_image = build_receipt_image(offer)
-                    print(f"[BUILD] Receipt size: {receipt_image.size[0]} x {receipt_image.size[1]} pixels")
+                    if offer.get('type') == 'quick-prints':
+                        receipt_image = build_quick_prints_receipt(offer)
+                        print(f"[BUILD] Quick Prints '{offer.get('template')}' receipt: {receipt_image.size[0]} x {receipt_image.size[1]} pixels")
+                    else:
+                        receipt_image = build_receipt_image(offer)
+                        print(f"[BUILD] Receipt size: {receipt_image.size[0]} x {receipt_image.size[1]} pixels")
 
                     # Save debug copy (optional - for troubleshooting)
                     debug_path = os.path.join(tempfile.gettempdir(), "receipt_debug.png")
