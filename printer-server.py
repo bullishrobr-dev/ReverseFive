@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
 """
-Zero Lines Thermal Print Server - ESC/POS Direct Mode
-Sends raw ESC/POS commands to the thermal printer.
-No Windows print driver conversion. No HTML. Just raw bytes.
+Zero Lines Thermal Print Server - IMAGE MODE
+============================================
+Generates receipt as a bitmap image and prints via Windows GDI.
+This is the same approach your POS system uses — it works with
+BIXOLON SRP-350 and any thermal printer that has a Windows driver.
 
 Usage:  python printer-server.py
         Then click "Print Receipt" in the admin panel.
 
-Requirements: Python 3.x (already installed)
+How it works:
+1. Admin panel sends offer JSON to this server
+2. Server builds a receipt image (logo, text, QR code) using Pillow
+3. Image is sent to the printer through Windows GDI (like a photo)
+4. The BIXOLON driver converts the image to thermal dots automatically
 """
 
 import os
@@ -17,16 +23,41 @@ import base64
 import tempfile
 import threading
 from datetime import datetime
+from io import BytesIO
+
+# ============================================================
+# AUTO-INSTALL DEPENDENCIES
+# ============================================================
+def ensure_import(module_name, pip_name=None):
+    """Import a module, auto-installing via pip if missing."""
+    if pip_name is None:
+        pip_name = module_name
+    try:
+        return __import__(module_name)
+    except ImportError:
+        print(f"[INSTALL] {pip_name} not found. Installing...")
+        result = os.system(f'"{sys.executable}" -m pip install {pip_name}')
+        if result != 0:
+            print(f"[ERROR] Failed to install {pip_name}")
+            sys.exit(1)
+        return __import__(module_name)
+
+PIL = ensure_import('PIL', 'pillow')
+Image = PIL.Image
+ImageDraw = PIL.ImageDraw
+ImageFont = PIL.ImageFont
+qrcode_module = ensure_import('qrcode', 'qrcode[pil]')
+
 
 # ============================================================
 # CONFIGURE YOUR PRINTER HERE
 # ============================================================
-PRINTER_NAME = "80mm Series Printer"   # <-- Change this if needed
-PAPER_WIDTH = 384                      # 384 dots = 58mm paper
-# PAPER_WIDTH = 576                    # 576 dots = 80mm paper
+PRINTER_NAME = "80mm Series Printer"   # <-- Your Windows printer name
+PAPER_WIDTH_MM = 80                    # 80mm or 58mm
+PAPER_WIDTH_DOTS = 576                 # 80mm at ~180 DPI
 # ============================================================
 
-# Gift names (ASCII only - no accents)
+# Gift names (ASCII only - no accents for thermal compatibility)
 GIFT_NAMES = {
     'day-cream': 'Crema de Dia',
     'night-cream': 'Crema de Noche',
@@ -42,479 +73,390 @@ GIFT_NAMES = {
 
 
 # ============================================================
-# EMBEDDED LOGO RASTER DATA (384x231, 1-bit, 48 bytes/line)
+# FONT HELPERS
 # ============================================================
-# This is the Zero Lines logo pre-converted to ESC/POS raster format.
-# It was generated from assets/zerolines-logo.png
-LOGO_B64 = (
-    "/////////////////////////////////AAD////////////////////////////////////////"
-    "////////////////////8AAAf///////////////////////////////////////////////////"
-    "////////AAAAH//////////////////////////////////////////////////////////8AAAA"
-    "D//////////////////////////////////////////////////////////wAAAAA///////////"
-    "///////////////////////////////////////////////AAAAAAf//////////////////////"
-    "//////////////////////////////////8AAAAAAP//////////////////////////////////"
-    "//////////////////////wAAAAAAH//////////////////////////////////////////////"
-    "//////////AAAAAAAD///////////////////////////////////////////////////////8AA"
-    "AAAAAB///////////////////////////////////////////////////////wAAAAAAAB//////"
-    "/////////////////////////////////////////////////AAAAAAAAA//////////////////"
-    "////////////////////////////////////8AAAAAAAAA//////////////////////////////"
-    "////////////////////////wAAAAAAAAAf/////////////////////////////////////////"
-    "////////////AAAAAAAAAAf////////////////////////////////////////////////////+"
-    "AAAAAAAAAAP////////////////////////////////////////////////////4AAAAAAAAAAP/"
-    "///////////////////////////////////////////////////gAAAAAAAAAAP/////////////"
-    "//////////////////////////////////////+AAAAAAAAAAAP/////////////////////////"
-    "//////////////////////////4AAAAAAAAAAAH/////////////////////////////////////"
-    "//////////////gAAAAAAAAAAAH/////////////////////////////////////////////////"
-    "//AAAAAAAAAAAAH//////////////////////////////////////////////////8AAAAAAAAAA"
-    "AAH//////////////////////////////////////////////////gAAAAAAAAAAAAH/////////"
-    "/////////////////////////////////////////AAAAAAAAAAAAAH/////////////////////"
-    "////////////////////////////4AAAAAAAAAAAAAH/////////////////////////////////"
-    "////////////////wAAAAAAAAAAAAAH/////////////////////////////////////////////"
-    "////AAAAAAAAAAAAAAH////////////////////////////////////////////////8AAAAAAAA"
-    "AYAAAAH////////////////////////////////////////////////wAAAAAAAAA4AAAAH/////"
-    "///////////////////////////////////////////AAAAAAAAAD4AAAAH/////////////////"
-    "//////////////////////////////8AAAAAAAAAP4AAAAH/////////////////////////////"
-    "//////////////////4AAAAAAAAA/4AAAAH/////////////////////////////////////////"
-    "//////gAAAAAAAAD/4AAAAH//////////////////////////////////////////////+AAAAAA"
-    "AAAP/4AAAAH//////////////////////////////////////////////4AAAAAAAAAf/4AAAAH/"
-    "/////////////////////////////////////////////gAAAAAAAAB//wAAAAH/////////////"
-    "////////////////////////////////+AAAAAAAAAH//wAAAAH/////////////////////////"
-    "////////////////////4AAAAAAAAAf//4AAAAH/////////////////////////////////////"
-    "////////gAAAAAAAAB///4AAAAH////////////////////////////////////////////+AAAA"
-    "AAAAAH///wAAAAH////////////////////////////////////////////4AAAAAAAAAf///wAA"
-    "AAH////////////////////////////////////////////gAAAAAAAAB////wAAAAH/////////"
-    "///////////////////////////////////AAAAAAAAAH////4AAAAH/////////////////////"
-    "//////////////////////8AAAAAAAAAf////wAAAAH/////////////////////////////////"
-    "//////////8AAAAAAAAB///x/wAAAAH///////////////////////////////////////////+A"
-    "AAAAAAAD///h/wAAAAH////////////////////////////////////////////AAAAAAAAP//8B"
-    "/wAAAAH////////////////////////////////////////////wAAAAAAA///wB/wAAAAH/////"
-    "///////////////////////////////////////8AAAAAAD///gB/wAAAAH/////////////////"
-    "///////////////////////////+AAAAAAP//+AB/wAAAAH/////////////////////////////"
-    "////////////////gAAAAA///4AB/wAAAAH/////////////////////////////////////////"
-    "////4AAAAD///gAB/wAAAAH/////////////////////////////////////////////+AAAAP//"
-    "+AAB/wAAAAH//////////////////////////////////////////////AAAAf//4AAB/wAAAAH/"
-    "/////////////////////////////////////////////wAAD///wAAB/wAAAAH/////////////"
-    "/////////////////////////////////8AAH///AAAB/wAAAAH/////////////////////////"
-    "//////////////////////AAf//8AAAB/wAAAAP/////////////////////////////////////"
-    "//////////gB///gAAAB/wAAAAP///////////////////////////////////////////////4H"
-    "///AAAAB/wAAAAP///////////////////////////////////////////////+f//8AAAAB/wAA"
-    "AAP///////////////////////////////////////////////////8AAAAB/wAAAAP/////////"
-    "//////////////////////////////////////////8AAAAB/wAAAAP/////////////////////"
-    "//////////////////////////////8AAAAB/wAAAAP/////////////////////////////////"
-    "//////////////////8AAAAB/wAAAAP/////////////////////////////////////////////"
-    "//////8AAAAB/wAAAAP///////////////////////////////////////////////////8AAAAD"
-    "/wAAAAP///P///////////////////////////////////////////////8AAAAD/wAAAAP//8H/"
-    "//////////////////////////////////////////////8AAAAD/wAAAAf//wB/////////////"
-    "//////////////////////////////////8AAAAD/wAAAB///gAf////////////////////////"
-    "//////////////////////8AAAAD/wAAAH//8AAH////////////////////////////////////"
-    "//////////8AAAAD/wAAAf//4AAB//////////////////////////////////////////////8A"
-    "AAAD/wAAB///gAAA//////////////////////////////////////////////8AAAAD/wAAH//+"
-    "AAAAP/////////////////////////////////////////////8AAAAD/wAAf//4AAAAD///////"
-    "//////////////////////////////////////8AAAAD/gAA///gAAAAB///////////////////"
-    "//////////////////////////8AAAAD/wAD//+AAAAAAP//////////////////////////////"
-    "//////////////8AAAAD/wAP//8AAAAAAH//////////////////////////////////////////"
-    "//8AAAAD/wA///gAAAAAAB////////////////////////////////////////////8AAAAD/wD/"
-    "//AAAAAAAAf///////////////////////////////////////////8AAAAD/wP//8AAAAAAAAP/"
-    "//////////////////////////////////////////8AAAAD/w///wAAAAAAAAD/////////////"
-    "//////////////////////////////8AAAAD/z///AAAAAAAAAH/////////////////////////"
-    "//////////////////8AAAAD////8AAAAAAAAAP/////////////////////////////////////"
-    "//////8AAAAD////wAAAAAAAAA////////////////////////////////////////////8AAAAD"
-    "////AAAAAAAAAD////////////////////////////////////////////8AAAAD///8AAAAAAAA"
-    "AP////////////////////////////////////////////8AAAAD///wAAAAAAAAA///////////"
-    "//////////////////////////////////8AAAAD///AAAAAAAAAD///////////////////////"
-    "//////////////////////8AAAAD//+AAAAAAAAAP///////////////////////////////////"
-    "//////////8AAAAD//4AAAAAAAAA//////////////////////////////////////////////8A"
-    "AAAD//gAAAAAAAAB//////////////////////////////////////////////8AAAAD/+AAAAAA"
-    "AAAH//////////////////////////////////////////////8AAAAD/4AAAAAAAAAf////////"
-    "//////////////////////////////////////8AAAAD/gAAAAAAAAB/////////////////////"
-    "//////////////////////////4AAAAD+AAAAAAAAAH/////////////////////////////////"
-    "//////////////8AAAAD4AAAAAAAAAf/////////////////////////////////////////////"
-    "//8AAAADwAAAAAAAAB////////////////////////////////////////////////8AAAADAAAA"
-    "AAAAAH////////////////////////////////////////////////8AAAAAAAAAAAAAAf//////"
-    "//////////////////////////////////////////8AAAAAAAAAAAAAA///////////////////"
-    "//////////////////////////////8AAAAAAAAAAAAAD///////////////////////////////"
-    "//////////////////8AAAAAAAAAAAAAP///////////////////////////////////////////"
-    "//////8AAAAAAAAAAAAA//////////////////////////////////////////////////8AAAAA"
-    "AAAAAAAD//////////////////////////////////////////////////8AAAAAAAAAAAAP////"
-    "//////////////////////////////////////////////8AAAAAAAAAAAA/////////////////"
-    "//////////////////////////////////8AAAAAAAAAAAD/////////////////////////////"
-    "//////////////////////8AAAAAAAAAAAP/////////////////////////////////////////"
-    "//////////+AAAAAAAAAAA////////////////////////////////////////////////////+A"
-    "AAAAAAAAAD////////////////////////////////////////////////////+AAAAAAAAAAH//"
-    "///////////////////////////////////////////////////AAAAAAAAAAf//////////////"
-    "///////////////////////////////////////AAAAAAAAAB///////////////////////////"
-    "///////////////////////////AAAAAAAAAH///////////////////////////////////////"
-    "///////////////gAAAAAAAAf///////////////////////////////////////////////////"
-    "///gAAAAAAAB///////////////////////////////////////////////////////wAAAAAAAD"
-    "///////////////////////////////////////////////////////4AAAAAAAP////////////"
-    "///////////////////////////////////////////4AAAAAAA/////////////////////////"
-    "///////////////////////////////8AAAAAAD/////////////////////////////////////"
-    "////////////////////AAAAAAP/////////////////////////////////////////////////"
-    "////////gAAAAA//////////////////////////////////////////////////////////4AAA"
-    "AD//////////////////////////////////////////////////////////8AAAAf//////////"
-    "/////////////////////////////////////////////////AAAD///////////////////////"
-    "/////////////////////////////////////4AAf///////////////////////////////////"
-    "//////////////////////////fX////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "////////////////////////////////////////////////////////////////////////////"
-    "///////////////////////////////P////////////////////////////////////////////"
-    "//////////////////gAf///////////////////////////////////////////////////////"
-    "/////+AYf////////////////////////////////////////////////////////////4PYf///"
-    "//////////////////////////////////////////////////////wf/4nAf///////////////"
-    "//////////////////////////////////////////wP/xnCf///////////////////////////"
-    "//////////////////////////////wP/xmAf///////////////////////////////////////"
-    "//////////////////wP/hkAf///////////////////////////////////////////////////"
-    "//////wP/hgef/////////////////////////////////////////////////////////wP/Bw+"
-    "f/////////////////////////////////////////////////////////wP/Bg+f///////////"
-    "//////////////////////////////////////////////wP/JAAf///////////////////////"
-    "//////////////////////////////////wP/IHg////////////////////////////////////"
-    "//////////////////////wP/MP4////////////////////////////////////////////////"
-    "//////////wP/IPx//////////////////////////////////////////////////////////wP"
-    "/AAB//////////////////////////////////////////////////////////wP/B4D////////"
-    "//////////////////////////////////////////////////wP/BIH////////////////////"
-    "//////////////////////////////////////wP/gAf////////////////////////////////"
-    "//////////////////////////wP/z9/////////////////////////////////////////////"
-    "//////////////wP////////////////////////////////////////////////////////////"
-    "//wP//////////////////////////////////////////////////////////////wP////////"
-    "//////////////////////////////wA///////4H///4AP///////wP//////4AP//////wA///"
-    "///8AD//gAAAAAf//8AAD///8H+AAf/+AAA///////wP/A/8D/AAB/////8AAB/////AAAP/wAAA"
-    "AAf//wAAA///8H4AAD/4AAAP//////wP/A/8D4AAAf////wAAA////8AAAD/wAAAAAf//AAAAP//"
-    "8HgAAB/gAAAD//////wP/A/8DwAAAH////AAAAH///wAAAAfwAAAAAf/8AAAAD//8HAAAD/AAAAB"
-    "//////wP/A/8DgAAAB///8AAAAD///gAAAAPwAAAAA//4ABsAB//8GAAAH8AAYgAf/////wP/A/8"
-    "DAAbAA///4AH8AB///ABBQAH////+B//wA//wA//8EAf+H4AP/8AP/////wP/A/8AAP/4Af//wA/"
-    "/4A//+AH//gD////8B//gD//8Af/8AB///wA///AH/////wP/A/8AA///AP//gD//+Af/8A///4D"
-    "////8D//AP///AP/8AH///gD///gH/////wP/A/8AD///gP//AP///gP/8B///8H////4H/+Af//"
-    "/gP/8AP///AP///4D/////wP/A/8AH///wH/+Af///wH/4D////P////wP/8B////4H/8Af///Af"
-    "///8B/////wP/A/8AP///4H/+A////4D/4H/////////gf/8D////4H/8A///+A////+A/////wP"
-    "/A/8Af///4D/8B////8D/4P/////////gf/4H////8D/8B///+B/////A/////wP/A/8A////8D/"
-    "4D////+B/4P/////////A//4H////+D/8B///8B/////Af////wP/A/8A////+B/4H////+B/4P/"
-    "///////+B//wP/////B/8D///8D/////gf////wP/A/8B////+B/wP/////B/4P////////+D//w"
-    "P/////B/8D///8H/////gf////wP/A/8B/////B/wP/////A/4H////////8D//wf/////B/8H//"
-    "/4H/////wP////wP/A/8B////+A/wP/////g/4H////////4H//g//////A/8H///4H/////wP//"
-    "//wP/A/8D/////B/gf/////gf8D////////wP//g//////g/8H///4P/////4P////wP/A/8D///"
-    "//B/gf/////g/8B////////wP//g//////g/8H///4P/////4H////wP/A/8D/////B/gf/////g"
-    "/+Af///////gf//A//////g/8H///wP/////4H////wP/A/8D/////B/g//////g//AB///////A"
-    "///A//////g/8H///wP/////4H////wP/A/8D/////B/A//////g//gAB/////+B///AAAAAAAA/"
-    "8H///wP/////4H////wP/A/8D/////B/AAAAAAAA//wAAH////+B///AAAAAAAA/8H///wf/////"
-    "4H////wP/A/8D/////B/AAAAAAAA//8AAAP///8D///AAAAAAAA/8H///wf/////4H////wP/A/8"
-    "D/////B/AAAAAAAA///AAAD///4H///AAAAAAAA/8H///wf/////4H////wP/A/8D/////B/AAAA"
-    "AAAA///4AAAf//wH///AAAAAAAA/8H///wP/////4H////wP/A/8D/////B/AAAAAAAAf///wAAP"
-    "//wP///A////////8H///wP/////4H////wP/A/8D/////B/Af/////+/////+AH//gf///A////"
-    "////8H///wP/////4H////wP/A/8D/////B/A/////////////gD//A////g////////8H///wP/"
-    "////4H////wP/A/8D/////B/g/////////////4B/+B////g////////8H///wP/////4P////wP"
-    "/A/8D/////B/gf////////////8B/+B////g////////8H///4P/////wP////wP/A/8D/////B/"
-    "gf////////////+A/8D////wf///////8H///4H/////wP////wP/A/8D/////B/wf//////////"
-    "///A/4H////wf///////8H///4H/////gf////wP/A/8D/////B/wP/////////////A/4H////w"
-    "P///////8H///8D/////gf////wP/A/8D/////B/wP/////////////A/wP////wP///////8H//"
-    "/8D/////Af////wP/A/8D/////B/4H/////////////A/gf////4H///////8H///+B/////A///"
-    "//wP/A/8D/////B/4D///////9/////A/A/////4D////+//8H///+A////+A/////wP/A/8D///"
-    "//B/8B////+f/4f////A/B/////8B////8P/8H////Af///8B/////wP/A/8D/////B/8A////8P"
-    "/wP////A+B/////+A////wH/8H////AP///4D/////wP/A/8D/////B/+Af///4D/gH///+B8D//"
-    "////Af///gP/8H////gH///wD/////wP/A/8D/////B//AP///gH/wD///8B8D//////AH//+Af/"
-    "8H////wB///AH/////wP/A/8D/////B//gH//+AP/4A///4D4P//////gB//4A//8H////4Af/8A"
-    "P/////wP/A/8D/////B//wA//4Af/8Af//gDwAAAAAf/wAH8AB//8H////8AB/AAf/////wP/A/8"
-    "D/////B//4AD8AA//+AA/8AHgAAAAAf/8AAAAD//8H////+AAAAB//////wP/A/8D/////B//8AA"
-    "AAD///AAAAAPgAAAAAf/+AAAAP//8H/////gAAAD//////wP/A/8D/////B///AAAAH///gAAAA/"
-    "AAAAAAf//gAAA///8H/////4AAAP//////wP/A/8D/////B///wAAAf///8AAAB/AAAAAAf//8AA"
-    "D///8H/////+AAA///////wP/A/8D/////B///8AAD/////AAAH///////////gA////////////"
-    "4AP////////////////////////wAf/////8AB//"
-)
+def find_font(names, size):
+    """Find a Windows system font by filename."""
+    font_dirs = [
+        os.path.expandvars(r"%WINDIR%\Fonts"),
+        r"C:\Windows\Fonts",
+    ]
+    for d in font_dirs:
+        for name in names:
+            path = os.path.join(d, name)
+            if os.path.exists(path):
+                try:
+                    return ImageFont.truetype(path, size)
+                except Exception:
+                    pass
+    return ImageFont.load_default()
+
+
+def load_font(size, bold=False):
+    """Load a sans-serif system font."""
+    names = []
+    if bold:
+        names.extend(["seguisb.ttf", "arialbd.ttf", "tahomabd.ttf", "verdanab.ttf"])
+    names.extend(["segoeui.ttf", "arial.ttf", "tahoma.ttf", "verdana.ttf", "msyh.ttc"])
+    return find_font(names, size)
+
+
+def load_mono_font(size):
+    """Load a monospace font for aligned pricing."""
+    return find_font(["cour.ttf", "consola.ttf", "lucon.ttf", "courbd.ttf"], size)
 
 
 # ============================================================
-# ESC/POS COMMAND BUILDER
+# RECEIPT IMAGE BUILDER
 # ============================================================
-class ESCPOS:
-    """Builds ESC/POS command sequences."""
+def build_receipt_image(offer):
+    """
+    Build a receipt as a PIL Image.
+    The receipt includes logo, text, pricing, QR code, and footer.
+    """
+    width = PAPER_WIDTH_DOTS
 
-    # Commands
-    ESC = b'\x1b'
-    GS = b'\x1d'
-    LF = b'\x0a'
-    INIT = ESC + b'@'                    # Initialize printer
-    CUT = GS + b'V\x42\x00'              # Full cut
-    CUT_PARTIAL = GS + b'V\x41\x00'      # Partial cut
-    FEED = ESC + b'd'                    # Feed n lines
-    ALIGN_LEFT = ESC + b'a\x00'
-    ALIGN_CENTER = ESC + b'a\x01'
-    ALIGN_RIGHT = ESC + b'a\x02'
-    BOLD_ON = ESC + b'E\x01'
-    BOLD_OFF = ESC + b'E\x00'
-    DOUBLE_ON = ESC + b'!\x30'
-    DOUBLE_OFF = ESC + b'!\x00'
-    UNDERLINE_ON = ESC + b'-\x01'
-    UNDERLINE_OFF = ESC + b'-\x00'
+    # --- Load fonts ---
+    font_header = load_font(32, bold=True)
+    font_subheader = load_font(24, bold=True)
+    font_title = load_font(20, bold=True)
+    font_text = load_font(20)
+    font_small = load_font(16)
+    font_large = load_font(28, bold=True)
 
-    def __init__(self):
-        self.buf = bytearray()
+    # --- Create a tall canvas for measurement ---
+    temp_img = Image.new('RGB', (width, 3000), 'white')
+    temp_draw = ImageDraw.Draw(temp_img)
 
-    def add(self, data):
-        if isinstance(data, str):
-            self.buf.extend(data.encode('ascii', 'replace'))
+    def text_size(text, font):
+        """Measure text dimensions."""
+        bbox = temp_draw.textbbox((0, 0), text, font=font)
+        return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+    def draw_text(y, text, font, align='left', color='black'):
+        """Draw a line of text and return its height."""
+        tw, th = text_size(text, font)
+        if align == 'center':
+            x = (width - tw) // 2
+        elif align == 'right':
+            x = width - tw - 20
         else:
-            self.buf.extend(data)
+            x = 20
+        temp_draw.text((x, y), text, font=font, fill=color)
+        return th
 
-    def text(self, s):
-        """Add text (ASCII only)."""
-        self.add(s.replace('\n', '\r\n'))
+    # --- Build receipt content ---
+    y = 30
 
-    def line(self, s=''):
-        self.text(s + '\n')
-
-    def bold(self, s):
-        self.add(self.BOLD_ON)
-        self.text(s)
-        self.add(self.BOLD_OFF)
-
-    def center(self):
-        self.add(self.ALIGN_CENTER)
-
-    def left(self):
-        self.add(self.ALIGN_LEFT)
-
-    def right(self):
-        self.add(self.ALIGN_RIGHT)
-
-    def feed(self, n=1):
-        self.add(self.ESC + b'd' + bytes([n]))
-
-    def cut(self):
-        self.add(self.CUT)
-
-    def qr_code(self, data):
-        """Print QR code using ESC/POS commands."""
-        d = data.encode('utf-8')
-        pL = len(d) & 0xFF
-        pH = (len(d) >> 8) & 0xFF
-
-        self.add(self.GS + b'(k')
-        self.add(bytes([4, 0, 49, 65, 50, 0]))     # Model 2
-
-        self.add(self.GS + b'(k')
-        self.add(bytes([3, 0, 49, 67, 6]))         # Size 6
-
-        self.add(self.GS + b'(k')
-        self.add(bytes([3, 0, 49, 69, 48]))        # Error correction L
-
-        self.add(self.GS + b'(k')
-        self.add(bytes([pL, pH, 49, 80, 48]))
-        self.add(d)
-
-        self.add(self.GS + b'(k')
-        self.add(bytes([3, 0, 49, 81, 48]))        # Print QR
-
-    def raster_image(self, width, height, bytes_per_line, raster_data):
-        """Print raster bit image using GS v 0 command."""
-        xl = width & 0xFF
-        xh = (width >> 8) & 0xFF
-        yl = height & 0xFF
-        yh = (height >> 8) & 0xFF
-
-        self.add(self.GS + b'v0\x00')
-        self.add(bytes([xl, xh, yl, yh]))
-        self.add(raster_data)
-
-    def get_bytes(self):
-        return bytes(self.buf)
-
-
-# ============================================================
-# WINDOWS PRINTER (ctypes + winspool)
-# ============================================================
-def print_raw(data, printer_name=PRINTER_NAME):
-    """Send raw bytes to a Windows printer using winspool API."""
-    import ctypes
-    from ctypes import wintypes
-
-    # Load winspool.drv explicitly (windll.winspool shorthand fails on some systems)
-    try:
-        winspool = ctypes.windll.LoadLibrary('winspool.drv')
-    except OSError:
-        winspool = ctypes.WinDLL('winspool.drv')
-
-    # Structures
-    class DOC_INFO_1(ctypes.Structure):
-        _fields_ = [
-            ("pDocName", wintypes.LPWSTR),
-            ("pOutputFile", wintypes.LPWSTR),
-            ("pDatatype", wintypes.LPWSTR),
-        ]
-
-    # Open printer
-    hPrinter = wintypes.HANDLE()
-    if not winspool.OpenPrinterW(printer_name, ctypes.byref(hPrinter), None):
-        err = ctypes.GetLastError()
-        raise RuntimeError(f"Cannot open printer '{printer_name}'. Error: {err}. "
-                           f"Check the PRINTER_NAME in this script.")
-
-    try:
-        # Start document in RAW mode
-        docInfo = DOC_INFO_1()
-        docInfo.pDocName = "Zero Lines Receipt"
-        docInfo.pOutputFile = None
-        docInfo.pDatatype = "RAW"
-
-        jobId = winspool.StartDocPrinterW(hPrinter, 1, ctypes.byref(docInfo))
-        if jobId == 0:
-            raise RuntimeError("Cannot start print job")
-
-        try:
-            # Start page
-            if not winspool.StartPagePrinter(hPrinter):
-                raise RuntimeError("Cannot start print page")
-
+    # Logo (PNG file next to script, or text fallback)
+    logo = None
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    for logo_name in ["zerolines-logo.png", "zerolines-logo.jpg", "logo.png", "logo.jpg"]:
+        logo_path = os.path.join(script_dir, logo_name)
+        if os.path.exists(logo_path):
             try:
-                # Write data using a proper buffer (handles null bytes correctly)
-                written = wintypes.DWORD()
-                buf = ctypes.create_string_buffer(data)
-                if not winspool.WritePrinter(
-                    hPrinter, buf, len(data), ctypes.byref(written)
-                ):
-                    err = ctypes.GetLastError()
-                    raise RuntimeError(f"WritePrinter failed. Error: {err}")
+                logo = Image.open(logo_path).convert('RGBA')
+                logo_w = min(width - 40, 320)
+                ratio = logo_w / logo.width
+                logo_h = int(logo.height * ratio)
+                logo = logo.resize((logo_w, logo_h), Image.LANCZOS)
+                break
+            except Exception:
+                pass
 
-            finally:
-                winspool.EndPagePrinter(hPrinter)
+    if logo:
+        logo_x = (width - logo.width) // 2
+        temp_img.paste(logo, (logo_x, y), logo)
+        y += logo.height + 20
+    else:
+        h = draw_text(y, "ZERO LINES", font_header, 'center')
+        y += h + 5
 
-        finally:
-            winspool.EndDocPrinter(hPrinter)
+    h = draw_text(y, "ANDORRA", font_subheader, 'center')
+    y += h + 15
 
-    finally:
-        winspool.ClosePrinter(hPrinter)
+    # Separator
+    temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+    y += 20
 
-    print(f"[OK] Sent {len(data)} bytes to {printer_name}")
-    return True
+    # Offer title
+    h = draw_text(y, "OFERTA EXCLUSIVA", font_title, 'center')
+    y += h + 10
 
-
-# ============================================================
-# RECEIPT BUILDER
-# ============================================================
-def build_receipt(offer):
-    """Build ESC/POS receipt from offer data."""
-    e = ESCPOS()
-
-    # Initialize
-    e.add(e.INIT)
-    e.center()
-
+    # Calculations
     units = offer.get('units', 1)
     regular = 300 * units
     custom = offer.get('price', 300) * units
     savings = regular - custom
 
-    # Logo (if available)
-    try:
-        logo_data = base64.b64decode(LOGO_B64)
-        e.raster_image(384, 231, 48, logo_data)
-        e.feed(1)
-    except:
-        pass  # Skip logo if data is missing
+    h = draw_text(y, f"Para: {offer.get('customer', 'Usted')}", font_text)
+    y += h + 5
+    h = draw_text(y, f"Por: {offer.get('seller', 'Vendedor')}", font_small)
+    y += h + 15
 
-    # Header
-    e.bold("ZERO LINES")
-    e.line("ANDORRA")
-    e.line("-" * 32)
-    e.bold("OFERTA EXCLUSIVA")
-    e.feed(1)
-    e.bold("Oferta Especial")
-    e.line(f"Para: {offer.get('customer', 'Usted')}")
-    e.feed(1)
-    e.line(f"Preparada por: {offer.get('seller', 'Vendedor')}")
-    e.line("-" * 32)
-    e.feed(1)
+    temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+    y += 20
 
-    # Product
-    e.bold("Reverse Five Wrinkle Eraser")
-    e.line(f"{units} unidad{'es' if units > 1 else ''}")
-    e.line("100 tratamientos - 2 anos")
-    e.line("-" * 32)
-    e.feed(1)
+    # Product info
+    h = draw_text(y, "Reverse Five Wrinkle Eraser", font_title, 'center')
+    y += h + 5
+    h = draw_text(y, f"{units} unidad{'es' if units > 1 else ''}", font_text, 'center')
+    y += h + 5
+    h = draw_text(y, "100 tratamientos - 2 anos", font_small, 'center')
+    y += h + 15
 
-    # Pricing
-    e.left()
-    e.line(f"Precio regular:     EUR {regular}")
-    e.bold(f"TU PRECIO:          EUR {custom}")
-    e.bold(f"AHORRAS:            EUR {savings}")
-    e.center()
-    e.line("-" * 32)
-    e.feed(1)
+    temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+    y += 20
+
+    # Pricing (monospace for alignment)
+    mono_font = load_mono_font(20)
+    h = draw_text(y, f"Precio regular:  EUR {regular}", mono_font)
+    y += h + 8
+    h = draw_text(y, f"TU PRECIO:       EUR {custom}", font_large)
+    y += h + 8
+    h = draw_text(y, f"AHORRAS:         EUR {savings}", font_large)
+    y += h + 15
+
+    temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+    y += 20
 
     # Gifts
     gifts = offer.get('gifts', [])
     if gifts:
-        e.bold(f"REGALOS INCLUIDOS ({len(gifts)})")
-        e.feed(1)
+        h = draw_text(y, f"REGALOS INCLUIDOS ({len(gifts)})", font_title, 'center')
+        y += h + 10
         for g in gifts:
-            e.line(f"+ {GIFT_NAMES.get(g, g)}")
-        e.feed(1)
-        e.line("-" * 32)
-        e.feed(1)
+            h = draw_text(y, f"+ {GIFT_NAMES.get(g, g)}", font_text)
+            y += h + 5
+        y += 10
+        temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+        y += 20
 
     # Note
     note = offer.get('note', '')
     if note:
-        e.line(f'"{note}"')
-        e.feed(1)
-        e.line("-" * 32)
-        e.feed(1)
+        h = draw_text(y, f'"{note}"', font_small)
+        y += h + 15
+        temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+        y += 20
 
-    # QR Code
+    # QR Code section
+    h = draw_text(y, "ESCANEA PARA RECLAMAR", font_title, 'center')
+    y += h + 10
+
+    # Generate QR code image
     url = f"https://bullishrobr-dev.github.io/ReverseFive/offer.html?d="
     url += base64.b64encode(json.dumps(offer).encode()).decode()
 
-    e.bold("ESCANEA PARA RECLAMAR")
-    e.feed(1)
-    e.qr_code(url)
-    e.feed(1)
-    e.line("-" * 32)
-    e.feed(1)
+    qr = qrcode_module.QRCode(box_size=4, border=2)
+    qr.add_data(url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    qr_size = min(220, width - 80)
+    qr_img = qr_img.resize((qr_size, qr_size), Image.NEAREST)
+    qr_img = qr_img.convert('RGB')
+
+    qr_x = (width - qr_size) // 2
+    temp_img.paste(qr_img, (qr_x, y))
+    y += qr_size + 15
+
+    temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+    y += 20
 
     # Expiry
     expiry = offer.get('expires', '')
     if expiry:
         try:
             dt = datetime.fromisoformat(expiry.replace('Z', '+00:00'))
-            e.line("Oferta expira:")
-            e.bold(dt.strftime("%d/%m/%Y %H:%M"))
-        except:
-            e.line(f"Expira: {expiry}")
-    e.feed(1)
-    e.line("-" * 32)
-    e.feed(1)
+            h = draw_text(y, "Oferta expira:", font_text, 'center')
+            y += h + 5
+            h = draw_text(y, dt.strftime("%d/%m/%Y %H:%M"), font_subheader, 'center')
+            y += h + 15
+        except Exception:
+            h = draw_text(y, f"Expira: {expiry}", font_text, 'center')
+            y += h + 15
+        temp_draw.line([(20, y), (width - 20, y)], fill='black', width=2)
+        y += 20
 
     # Footer
-    e.line("Gracias por su confianza")
-    e.line("Zero Lines - Andorra")
-    e.line("+350 5400 5198")
-    e.line("info@zerolines.life")
-    e.feed(3)
-    e.cut()
+    h = draw_text(y, "Gracias por su confianza", font_text, 'center')
+    y += h + 5
+    h = draw_text(y, "Zero Lines - Andorra", font_small, 'center')
+    y += h + 5
+    h = draw_text(y, "+350 5400 5198", font_small, 'center')
+    y += h + 5
+    h = draw_text(y, "info@zerolines.life", font_small, 'center')
+    y += h + 30
 
-    return e.get_bytes()
+    # Cut line (thick)
+    temp_draw.line([(20, y), (width - 20, y)], fill='black', width=4)
+    y += 40
+
+    # --- Crop to actual content size ---
+    receipt = temp_img.crop((0, 0, width, y))
+    return receipt
+
+
+# ============================================================
+# WINDOWS GDI PRINTER (ctypes - no pywin32 needed)
+# ============================================================
+def print_receipt_image(image, printer_name=PRINTER_NAME):
+    """
+    Print a PIL Image via Windows GDI using ctypes.
+    This sends the image to the printer like a photo/document,
+    and the BIXOLON driver handles converting it to thermal dots.
+    """
+    import ctypes
+    from ctypes import wintypes
+
+    gdi32 = ctypes.windll.gdi32
+
+    # Ensure image is RGB
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+
+    width, height = image.size
+
+    # Convert PIL RGB data to Windows BGR format for DIB
+    rgb_data = image.tobytes()
+    bgr_data = bytearray()
+    for i in range(0, len(rgb_data), 3):
+        bgr_data.extend([rgb_data[i + 2], rgb_data[i + 1], rgb_data[i]])
+    bgr_data = bytes(bgr_data)
+
+    # Create printer device context
+    hdc = gdi32.CreateDCW("WINSPOOL", printer_name, None, None)
+    if not hdc:
+        err = ctypes.GetLastError()
+        raise RuntimeError(
+            f"Cannot open printer '{printer_name}'. Error: {err}.\n"
+            f"Make sure the printer name matches exactly in Windows.\n"
+            f"Check: Control Panel > Devices and Printers"
+        )
+
+    try:
+        # Start print document
+        class DOCINFOW(ctypes.Structure):
+            _fields_ = [
+                ("cbSize", wintypes.INT),
+                ("lpszDocName", wintypes.LPCWSTR),
+                ("lpszOutput", wintypes.LPCWSTR),
+                ("lpszDatatype", wintypes.LPCWSTR),
+                ("fwType", wintypes.DWORD),
+            ]
+
+        doc_info = DOCINFOW()
+        doc_info.cbSize = ctypes.sizeof(DOCINFOW)
+        doc_info.lpszDocName = "Zero Lines Receipt"
+        doc_info.lpszOutput = None
+        doc_info.lpszDatatype = None
+        doc_info.fwType = 0
+
+        if gdi32.StartDocW(hdc, ctypes.byref(doc_info)) <= 0:
+            err = ctypes.GetLastError()
+            raise RuntimeError(f"StartDoc failed. Error: {err}")
+
+        try:
+            if gdi32.StartPage(hdc) <= 0:
+                err = ctypes.GetLastError()
+                raise RuntimeError(f"StartPage failed. Error: {err}")
+
+            try:
+                # Create memory DC compatible with printer
+                memdc = gdi32.CreateCompatibleDC(hdc)
+                if not memdc:
+                    raise RuntimeError("CreateCompatibleDC failed")
+
+                try:
+                    # BITMAPINFO for 24-bit DIB
+                    class BITMAPINFOHEADER(ctypes.Structure):
+                        _fields_ = [
+                            ("biSize", wintypes.DWORD),
+                            ("biWidth", wintypes.LONG),
+                            ("biHeight", wintypes.LONG),
+                            ("biPlanes", wintypes.WORD),
+                            ("biBitCount", wintypes.WORD),
+                            ("biCompression", wintypes.DWORD),
+                            ("biSizeImage", wintypes.DWORD),
+                            ("biXPelsPerMeter", wintypes.LONG),
+                            ("biYPelsPerMeter", wintypes.LONG),
+                            ("biClrUsed", wintypes.DWORD),
+                            ("biClrImportant", wintypes.DWORD),
+                        ]
+
+                    class RGBQUAD(ctypes.Structure):
+                        _fields_ = [
+                            ("rgbBlue", wintypes.BYTE),
+                            ("rgbGreen", wintypes.BYTE),
+                            ("rgbRed", wintypes.BYTE),
+                            ("rgbReserved", wintypes.BYTE),
+                        ]
+
+                    class BITMAPINFO(ctypes.Structure):
+                        _fields_ = [
+                            ("bmiHeader", BITMAPINFOHEADER),
+                            ("bmiColors", RGBQUAD * 1),
+                        ]
+
+                    bmi = BITMAPINFO()
+                    bmi.bmiHeader.biSize = ctypes.sizeof(BITMAPINFOHEADER)
+                    bmi.bmiHeader.biWidth = width
+                    bmi.bmiHeader.biHeight = -height   # Negative = top-down
+                    bmi.bmiHeader.biPlanes = 1
+                    bmi.bmiHeader.biBitCount = 24
+                    bmi.bmiHeader.biCompression = 0    # BI_RGB
+                    bmi.bmiHeader.biSizeImage = len(bgr_data)
+                    bmi.bmiHeader.biXPelsPerMeter = 0
+                    bmi.bmiHeader.biYPelsPerMeter = 0
+                    bmi.bmiHeader.biClrUsed = 0
+                    bmi.bmiHeader.biClrImportant = 0
+
+                    # Create DIB section (memory-mapped bitmap)
+                    ppvBits = ctypes.c_void_p()
+                    hbitmap = gdi32.CreateDIBSection(
+                        memdc, ctypes.byref(bmi), 0,
+                        ctypes.byref(ppvBits), None, 0
+                    )
+                    if not hbitmap:
+                        raise RuntimeError("CreateDIBSection failed")
+
+                    try:
+                        # Copy image pixels into DIB memory
+                        ctypes.memmove(ppvBits.value, bgr_data, len(bgr_data))
+
+                        # Select bitmap into memory DC
+                        old_bitmap = gdi32.SelectObject(memdc, hbitmap)
+
+                        # Copy from memory DC to printer DC
+                        SRCCOPY = 0x00CC0020
+                        result = gdi32.BitBlt(
+                            hdc, 0, 0, width, height,
+                            memdc, 0, 0, SRCCOPY
+                        )
+                        if not result:
+                            err = ctypes.GetLastError()
+                            raise RuntimeError(f"BitBlt failed. Error: {err}")
+
+                        # Restore old bitmap
+                        gdi32.SelectObject(memdc, old_bitmap)
+
+                    finally:
+                        gdi32.DeleteObject(hbitmap)
+
+                finally:
+                    gdi32.DeleteDC(memdc)
+
+            finally:
+                gdi32.EndPage(hdc)
+
+        finally:
+            gdi32.EndDoc(hdc)
+
+    finally:
+        gdi32.DeleteDC(hdc)
+
+    print(f"[OK] Printed {width}x{height} receipt to '{printer_name}'")
+    return True
 
 
 # ============================================================
@@ -539,8 +481,22 @@ def start_server(port=8765):
                 import traceback
                 try:
                     offer = json.loads(post_data)
-                    receipt_bytes = build_receipt(offer)
-                    success = print_raw(receipt_bytes)
+
+                    # Build receipt image
+                    print(f"[BUILD] Generating receipt image...")
+                    receipt_image = build_receipt_image(offer)
+                    print(f"[BUILD] Receipt size: {receipt_image.size[0]} x {receipt_image.size[1]} pixels")
+
+                    # Save debug copy (optional - for troubleshooting)
+                    debug_path = os.path.join(tempfile.gettempdir(), "receipt_debug.png")
+                    try:
+                        receipt_image.save(debug_path)
+                        print(f"[DEBUG] Saved preview to: {debug_path}")
+                    except Exception:
+                        pass
+
+                    # Print via GDI
+                    success = print_receipt_image(receipt_image, PRINTER_NAME)
 
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json')
@@ -550,6 +506,7 @@ def start_server(port=8765):
                         'success': success,
                         'message': 'Receipt printed!'
                     }).encode())
+
                 except Exception as e:
                     error_msg = str(e)
                     tb = traceback.format_exc()
@@ -572,17 +529,17 @@ def start_server(port=8765):
             print("[Print Server]", format % args)
 
     server = HTTPServer(('127.0.0.1', port), PrintHandler)
-    print("=" * 50)
-    print("Zero Lines Thermal Print Server")
-    print("ESC/POS Direct Mode")
-    print("=" * 50)
-    print(f"Running at: http://127.0.0.1:{port}")
-    print(f"Printer: {PRINTER_NAME}")
-    print(f"Paper width: {PAPER_WIDTH} dots")
+    print("=" * 56)
+    print("  Zero Lines Thermal Print Server")
+    print("  Image Mode (GDI) - BIXOLON Compatible")
+    print("=" * 56)
+    print(f"  Running at: http://127.0.0.1:{port}")
+    print(f"  Printer:    {PRINTER_NAME}")
+    print(f"  Paper:      {PAPER_WIDTH_MM}mm ({PAPER_WIDTH_DOTS} dots)")
     print("")
-    print("Usage: Click 'Print Receipt' in the admin panel")
-    print("Press Ctrl+C to stop")
-    print("=" * 50)
+    print("  Usage: Click 'Print Receipt' in the admin panel")
+    print("         Press Ctrl+C to stop")
+    print("=" * 56)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
