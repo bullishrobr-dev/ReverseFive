@@ -18,35 +18,49 @@ How it works:
 
 import os
 import sys
-import json
-import base64
-import tempfile
-import threading
-from datetime import datetime
-from io import BytesIO
+import traceback
 
-# ============================================================
-# AUTO-INSTALL DEPENDENCIES
-# ============================================================
-def ensure_import(module_name, pip_name=None):
-    """Import a module, auto-installing via pip if missing."""
-    if pip_name is None:
-        pip_name = module_name
-    try:
-        return __import__(module_name)
-    except ImportError:
-        print(f"[INSTALL] {pip_name} not found. Installing...")
-        result = os.system(f'"{sys.executable}" -m pip install {pip_name}')
-        if result != 0:
-            print(f"[ERROR] Failed to install {pip_name}")
-            sys.exit(1)
-        return __import__(module_name)
+# --- Catch ALL startup errors and print them ---
+startup_error = None
+try:
+    import json
+    import base64
+    import tempfile
+    import threading
+    from datetime import datetime
+    from io import BytesIO
 
-PIL = ensure_import('PIL', 'pillow')
-Image = PIL.Image
-ImageDraw = PIL.ImageDraw
-ImageFont = PIL.ImageFont
-qrcode_module = ensure_import('qrcode', 'qrcode[pil]')
+    # ============================================================
+    # AUTO-INSTALL DEPENDENCIES
+    # ============================================================
+    def ensure_import(module_name, pip_name=None):
+        """Import a module, auto-installing via pip if missing."""
+        if pip_name is None:
+            pip_name = module_name
+        try:
+            return __import__(module_name)
+        except ImportError:
+            print(f"[INSTALL] {pip_name} not found. Installing...")
+            result = os.system(f'"{sys.executable}" -m pip install "{pip_name}"')
+            if result != 0:
+                print(f"[ERROR] Failed to install {pip_name}")
+                sys.exit(1)
+            return __import__(module_name)
+
+    PIL = ensure_import('PIL', 'pillow')
+    Image = PIL.Image
+    ImageDraw = PIL.ImageDraw
+    ImageFont = PIL.ImageFont
+    qrcode_module = ensure_import('qrcode', 'qrcode[pil]')
+
+except Exception as e:
+    startup_error = traceback.format_exc()
+    print("=" * 60)
+    print("FATAL ERROR DURING STARTUP:")
+    print(startup_error)
+    print("=" * 60)
+    input("Press Enter to exit...")
+    sys.exit(1)
 
 
 # ============================================================

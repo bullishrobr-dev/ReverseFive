@@ -1,7 +1,7 @@
 @echo off
 echo ========================================
 echo  Zero Lines Thermal Print Server
-echo  ESC/POS Direct Mode
+echo  Image Mode (GDI)
 echo ========================================
 echo.
 
@@ -44,4 +44,16 @@ echo.
     echo in the SAME folder as this batch file.
     echo.
     pause
+    exit /b 1
 )
+
+REM Always pause so user can see any error messages
+echo.
+echo Server exited.
+if exist "printer-error.log" (
+    echo.
+    echo Error log found:
+    type "printer-error.log"
+)
+echo.
+pause
