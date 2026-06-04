@@ -350,6 +350,12 @@ def print_raw(data, printer_name=PRINTER_NAME):
     import ctypes
     from ctypes import wintypes
 
+    # Load winspool.drv explicitly (windll.winspool shorthand fails on some systems)
+    try:
+        winspool = ctypes.windll.LoadLibrary('winspool.drv')
+    except OSError:
+        winspool = ctypes.WinDLL('winspool.drv')
+
     # Structures
     class DOC_INFO_1(ctypes.Structure):
         _fields_ = [
@@ -360,7 +366,7 @@ def print_raw(data, printer_name=PRINTER_NAME):
 
     # Open printer
     hPrinter = wintypes.HANDLE()
-    if not ctypes.windll.winspool.OpenPrinterW(printer_name, ctypes.byref(hPrinter), None):
+    if not winspool.OpenPrinterW(printer_name, ctypes.byref(hPrinter), None):
         err = ctypes.GetLastError()
         raise RuntimeError(f"Cannot open printer '{printer_name}'. Error: {err}. "
                            f"Check the PRINTER_NAME in this script.")
@@ -372,33 +378,33 @@ def print_raw(data, printer_name=PRINTER_NAME):
         docInfo.pOutputFile = None
         docInfo.pDatatype = "RAW"
 
-        jobId = ctypes.windll.winspool.StartDocPrinterW(hPrinter, 1, ctypes.byref(docInfo))
+        jobId = winspool.StartDocPrinterW(hPrinter, 1, ctypes.byref(docInfo))
         if jobId == 0:
             raise RuntimeError("Cannot start print job")
 
         try:
             # Start page
-            if not ctypes.windll.winspool.StartPagePrinter(hPrinter):
+            if not winspool.StartPagePrinter(hPrinter):
                 raise RuntimeError("Cannot start print page")
 
             try:
                 # Write data using a proper buffer (handles null bytes correctly)
                 written = wintypes.DWORD()
                 buf = ctypes.create_string_buffer(data)
-                if not ctypes.windll.winspool.WritePrinter(
+                if not winspool.WritePrinter(
                     hPrinter, buf, len(data), ctypes.byref(written)
                 ):
                     err = ctypes.GetLastError()
                     raise RuntimeError(f"WritePrinter failed. Error: {err}")
 
             finally:
-                ctypes.windll.winspool.EndPagePrinter(hPrinter)
+                winspool.EndPagePrinter(hPrinter)
 
         finally:
-            ctypes.windll.winspool.EndDocPrinter(hPrinter)
+            winspool.EndDocPrinter(hPrinter)
 
     finally:
-        ctypes.windll.winspool.ClosePrinter(hPrinter)
+        winspool.ClosePrinter(hPrinter)
 
     print(f"[OK] Sent {len(data)} bytes to {printer_name}")
     return True
