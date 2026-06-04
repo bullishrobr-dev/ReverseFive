@@ -1,106 +1,52 @@
-# Thermal Printer Setup Guide
+# BIXOLON SRP-350 Printer Setup for Raw ESC/POS
 
-## The Problem
+## Problem
+The BIXOLON Windows driver intercepts ESC/POS commands and converts them to GDI graphics, producing garbage output.
 
-Your thermal printer (BIXOLON SRP-350) speaks **ESC/POS** — a special language. Browsers cannot speak this language. That's why printing from a web page produces garbled text.
+## Solution: Add a "Generic / Text Only" Printer
 
-Your POS system works because it has native software that speaks ESC/POS directly.
+### Step 1: Find which USB port your BIXOLON printer uses
+1. Press `Win + R`, type `control printers`, press Enter
+2. Right-click "80mm Series Printer" → "Printer properties"
+3. Click the "Ports" tab
+4. Note which port is checked (e.g., `USB001`, `USB002`, `COM3`, etc.)
 
-## The Solution
+### Step 2: Add Generic/Text Only printer
+1. Press `Win + R`, type `control printers`, press Enter
+2. Click "Add a printer" at the top
+3. Click "The printer that I want isn't listed"
+4. Select "Add a local printer or network printer with manual settings"
+5. Select the SAME port as your BIXOLON printer (e.g., `USB001`)
+6. In the manufacturer list, select **"Generic"**
+7. On the right, select **"Generic / Text Only"**
+8. Name it: **`ThermalRaw`** (or any name you like)
+9. Do NOT share it, do NOT print a test page
+10. Click Finish
 
-We provide a **tiny local print server** that runs on your Windows computer. It receives the receipt data from the browser and sends it to the printer using plain text (which the Windows printer driver can handle).
-
----
-
-## Setup (One-time)
-
-### Step 1: Check if Python is installed
-
-1. Press `Windows + R`
-2. Type `cmd` and press Enter
-3. In the black window, type: `python --version`
-4. If you see a version number (e.g., `Python 3.11.0`), you're good! Skip to Step 3.
-
-### Step 2: Install Python (if not installed)
-
-1. Go to https://python.org/downloads
-2. Click **Download Python 3.x**
-3. Run the installer
-4. **IMPORTANT**: Check the box "Add Python to PATH" before clicking Install
-5. Click Install Now
-
-### Step 3: Start the print server
-
-1. Open the `reverse five` folder on your computer
-2. Double-click **`start-printer.bat`**
-3. A black window will open showing:
-   ```
-   Zero Lines Thermal Print Server
-   Running at: http://127.0.0.1:8765
-   ```
-4. **Leave this window open** while you're working
-
----
-
-## Using It
-
-1. Open the admin panel in your browser:
-   `https://bullishrobr-dev.github.io/ReverseFive/admin.html`
-
-2. Create a custom deal
-
-3. Click **Generate Offer**
-
-4. Click **Print Receipt**
-
-5. The receipt prints instantly!
-
----
-
-## If It Doesn't Print
-
-### Check 1: Is the print server running?
-Look for the black window with "Zero Lines Thermal Print Server". If it's not there, double-click `start-printer.bat` again.
-
-### Check 2: Is the printer name correct?
-Open `printer-server.py` in Notepad and change this line:
+### Step 3: Update the Python script
+Open `printer-server.py` and change:
 ```python
 PRINTER_NAME = "80mm Series Printer"
 ```
-To match your printer's exact name (as shown in Windows Settings > Printers).
+to:
+```python
+PRINTER_NAME = "ThermalRaw"
+```
 
-### Check 3: Use the fallback method
-If the local server doesn't work, the **Print Receipt** button will automatically fall back to opening a simple receipt page. Just click **PRINT RECEIPT** on that page and select your thermal printer in the dialog.
+### Step 4: Restart and test
+1. Close the Python server window (Ctrl+C)
+2. Double-click `start-printer.bat` to restart
+3. Click "Print Receipt" in the admin panel
+
+The receipt should now print correctly with proper text, formatting, logo, and QR code.
 
 ---
 
-## How It Works
+## Alternative: Direct COM Port (if printer exposes one)
 
-```
-Browser (Admin Panel)
-    |
-    | POST offer data
-    v
-Local Print Server (localhost:8765)
-    |
-    | Convert to plain ASCII text
-    v
-Windows Print System
-    |
-    | Send to printer driver
-    v
-Thermal Printer (BIXOLON SRP-350)
-```
+Some BIXOLON printers appear as a COM port. If you see `COM3`, `COM4`, etc. in the Ports tab:
 
-The receipt uses **only ASCII characters** (A-Z, 0-9, basic symbols) so the thermal printer always understands it. No euro symbols, no accents, no images — just clean text.
+1. Install pyserial: `pip install pyserial`
+2. We can modify the script to write directly to the COM port, bypassing Windows entirely
 
----
-
-## File Reference
-
-| File | Purpose |
-|------|---------|
-| `printer-server.py` | The Python print server (runs locally) |
-| `start-printer.bat` | Double-click to start the server |
-| `admin.html` | The admin panel (works from browser) |
-| `print.html` | Fallback receipt page (no server needed) |
+Let us know the port name and we can set that up instead.
