@@ -348,13 +348,13 @@ def _qp_center(draw, y, text, font, width, color='black'):
     tw, th = _qp_text_size(draw, text, font)
     x = (width - tw) // 2
     draw.text((x, y), text, font=font, fill=color)
-    return y + th + 8
+    return y + th + 14
 
 
 def _qp_left(draw, y, text, font, width, margin=20, color='black'):
     _, th = _qp_text_size(draw, text, font)
     draw.text((margin, y), text, font=font, fill=color)
-    return y + th + 6
+    return y + th + 12
 
 
 def _qp_wrap(draw, y, text, font, width, margin=20, align='left', color='black', spacing=2):
@@ -386,20 +386,20 @@ def _qp_wrap(draw, y, text, font, width, margin=20, align='left', color='black',
             x = margin
         draw.text((x, y), line, font=font, fill=color)
         y += th + spacing
-    return y + 6
+    return y + 12
 
 
 def _qp_sep(draw, y, width, style='single'):
     if style == 'double':
         draw.line([(20, y), (width - 20, y)], fill='black', width=2)
-        draw.line([(20, y + 6), (width - 20, y + 6)], fill='black', width=2)
-        return y + 20
+        draw.line([(20, y + 8), (width - 20, y + 8)], fill='black', width=2)
+        return y + 28
     elif style == 'light':
         draw.line([(20, y), (width - 20, y)], fill='black', width=1)
-        return y + 14
+        return y + 20
     else:
         draw.line([(20, y), (width - 20, y)], fill='black', width=2)
-        return y + 16
+        return y + 24
 
 
 def _qp_load_logo(shop, width):
@@ -438,8 +438,8 @@ def _qp_draw_logo(img, y, shop, width):
     if logo:
         x = (width - logo.width) // 2
         img.paste(logo, (x, y), logo)
-        return y + logo.height + 25
-    return y + 10
+        return y + logo.height + 35
+    return y + 20
 
 
 def _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader):
@@ -579,26 +579,36 @@ def build_qp_discount(data):
     draw = ImageDraw.Draw(img)
 
     y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
+    y += 10
     if d.get('headline'):
         y = _qp_center(draw, y, d['headline'].upper(), font_header, width)
+        y += 6
     y = _qp_sep(draw, y, width, 'double')
+    y += 10
     if d.get('code'):
         y = _qp_center(draw, y, f"CODE: {d['code']}", font_text, width)
     if d.get('percent'):
         y = _qp_center(draw, y, f"• {d['percent']}% OFF •", font_highlight, width)
     y = _qp_sep(draw, y, width)
+    y += 8
     if d.get('description'):
         y = _qp_wrap(draw, y, d['description'], font_text, width, align='center')
         y = _qp_sep(draw, y, width)
+        y += 8
     if d.get('redemption'):
         y = _qp_wrap(draw, y, d['redemption'], font_small, width, align='center')
         y = _qp_sep(draw, y, width)
+        y += 8
     if d.get('validUntil'):
         y = _qp_center(draw, y, f"VALID UNTIL: {d['validUntil']}", font_text, width)
         y = _qp_sep(draw, y, width)
+        y += 8
     y = _qp_draw_worker(draw, y, width, worker, font_text, font_small)
+    y += 10
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
@@ -620,7 +630,9 @@ def build_qp_businesscard(data):
     draw = ImageDraw.Draw(img)
 
     y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
+    y += 10
     if d.get('tagline'):
         y = _qp_center(draw, y, d['tagline'].upper(), font_title, width)
     if d.get('role'):
@@ -628,12 +640,16 @@ def build_qp_businesscard(data):
     if worker and worker.get('name'):
         y = _qp_center(draw, y, worker['name'], font_large, width)
     y = _qp_sep(draw, y, width)
+    y += 8
     if d.get('notes'):
         y = _qp_wrap(draw, y, d['notes'], font_text, width, align='center')
         y = _qp_sep(draw, y, width)
+        y += 8
     opts = {'showEmail': d.get('showEmail', False), 'showPhone': d.get('showPhone', False), 'showWhatsApp': d.get('showWhatsApp', False)}
     y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, opts)
+    y += 10
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
@@ -654,15 +670,19 @@ def build_qp_facial(data):
     draw = ImageDraw.Draw(img)
 
     y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
+    y += 10
     if d.get('headline'):
         y = _qp_center(draw, y, d['headline'].upper(), font_header, width)
     if d.get('subheadline'):
         y = _qp_center(draw, y, d['subheadline'], font_subheader, width)
     y = _qp_sep(draw, y, width)
+    y += 8
     if d.get('intro'):
         y = _qp_wrap(draw, y, d['intro'], font_text, width)
         y = _qp_sep(draw, y, width)
+        y += 8
     if d.get('benefits'):
         y = _qp_center(draw, y, 'BENEFITS', font_title, width)
         for line in d['benefits'].split('\n'):
@@ -670,13 +690,17 @@ def build_qp_facial(data):
             if line:
                 y = _qp_left(draw, y, f'• {line}', font_text, width)
         y = _qp_sep(draw, y, width)
+        y += 8
     if d.get('code'):
         y = _qp_center(draw, y, f"CODE: {d['code']}", font_text, width)
     if worker and worker.get('name'):
         y = _qp_center(draw, y, f"Specialist: {worker['name']}", font_text, width)
     y = _qp_sep(draw, y, width)
+    y += 8
     y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, {'showPhone': True, 'showWhatsApp': True})
+    y += 10
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
@@ -697,11 +721,14 @@ def build_qp_skincare(data):
     draw = ImageDraw.Draw(img)
 
     y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
+    y += 10
     y = _qp_center(draw, y, 'SKINCARE PLAN', font_header, width)
     if d.get('product'):
         y = _qp_center(draw, y, d['product'], font_subheader, width)
     y = _qp_sep(draw, y, width)
+    y += 8
     if d.get('steps'):
         y = _qp_center(draw, y, 'USAGE:', font_title, width)
         step_num = 1
@@ -711,25 +738,31 @@ def build_qp_skincare(data):
                 y = _qp_left(draw, y, f'{step_num}. {line}', font_text, width)
                 step_num += 1
         y = _qp_sep(draw, y, width)
+        y += 8
     if d.get('frequency'):
         y = _qp_left(draw, y, f"Frequency: {d['frequency']}", font_text, width)
     if d.get('duration'):
         y = _qp_left(draw, y, f"Duration: {d['duration']}", font_text, width)
     if d.get('frequency') or d.get('duration'):
         y = _qp_sep(draw, y, width)
+        y += 8
     if d.get('notes'):
         y = _qp_sep(draw, y, width, 'light')
         y = _qp_wrap(draw, y, d['notes'], font_small, width)
         y = _qp_sep(draw, y, width)
+        y += 8
     if worker:
         y = _qp_sep(draw, y, width)
+        y += 6
         y = _qp_center(draw, y, 'YOUR SPECIALIST', font_small, width)
         if worker.get('name'):
             y = _qp_center(draw, y, worker['name'], font_text, width)
         if worker.get('role'):
             y = _qp_center(draw, y, worker['role'], font_small, width)
         y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, {'showPhone': True, 'showWhatsApp': True})
+    y += 10
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
@@ -749,7 +782,9 @@ def build_qp_custom(data):
     draw = ImageDraw.Draw(img)
 
     y = _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader)
+    y += 10
     y = _qp_sep(draw, y, width)
+    y += 8
 
     content = d.get('content', '')
     content = _qp_resolve_placeholders(content, shop, worker)
@@ -759,8 +794,11 @@ def build_qp_custom(data):
             if para:
                 y = _qp_wrap(draw, y, para, font_text, width, align='center')
                 y = _qp_sep(draw, y, width, 'light')
+                y += 6
 
+    y += 8
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
+    y += 10
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
