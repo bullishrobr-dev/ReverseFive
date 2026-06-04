@@ -34,6 +34,7 @@ try:
     # AUTO-INSTALL DEPENDENCIES
     # ============================================================
     import importlib
+    import subprocess
 
     def install_if_missing(pip_name, import_name):
         """Install package via pip if import fails. Clear cache after install."""
@@ -41,9 +42,16 @@ try:
             importlib.import_module(import_name)
         except ImportError:
             print(f"[INSTALL] {pip_name} not found. Installing...")
-            result = os.system(f'"{sys.executable}" -m pip install "{pip_name}"')
-            if result != 0:
+            try:
+                result = subprocess.run(
+                    [sys.executable, "-m", "pip", "install", pip_name],
+                    capture_output=True, text=True, check=True
+                )
+                print(f"[OK] Installed {pip_name}")
+            except subprocess.CalledProcessError as e:
                 print(f"[ERROR] Failed to install {pip_name}")
+                print(e.stderr)
+                input("Press Enter to exit...")
                 sys.exit(1)
             # Clear stale module cache so fresh import works
             for key in list(sys.modules.keys()):
@@ -52,7 +60,7 @@ try:
 
     # Install first, then import fresh
     install_if_missing('pillow', 'PIL')
-    install_if_missing('qrcode[pil]', 'qrcode')
+    install_if_missing('qrcode', 'qrcode')
 
     Image = importlib.import_module('PIL.Image')
     ImageDraw = importlib.import_module('PIL.ImageDraw')
