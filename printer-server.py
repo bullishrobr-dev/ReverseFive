@@ -599,13 +599,6 @@ def build_qp_discount(data):
         y = _qp_sep(draw, y, width)
     y = _qp_draw_worker(draw, y, width, worker, font_text, font_small)
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
-    if d.get('cta'):
-        y = _qp_sep(draw, y, width)
-        y = _qp_wrap(draw, y, d['cta'], font_text, width, align='center')
-        y = _qp_sep(draw, y, width)
-    if d.get('showFreeDelivery') and d.get('freeDeliveryCopy'):
-        y = _qp_wrap(draw, y, d['freeDeliveryCopy'], font_small, width, align='center')
-        y = _qp_sep(draw, y, width)
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
@@ -641,10 +634,6 @@ def build_qp_businesscard(data):
     opts = {'showEmail': d.get('showEmail', False), 'showPhone': d.get('showPhone', False), 'showWhatsApp': d.get('showWhatsApp', False)}
     y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, opts)
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
-    if d.get('cta'):
-        y = _qp_sep(draw, y, width)
-        y = _qp_wrap(draw, y, d['cta'], font_text, width, align='center')
-        y = _qp_sep(draw, y, width)
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
@@ -688,10 +677,6 @@ def build_qp_facial(data):
     y = _qp_sep(draw, y, width)
     y = _qp_draw_worker(draw, y, width, worker, font_text, font_small, {'showPhone': True, 'showWhatsApp': True})
     y = _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text)
-    if d.get('closing'):
-        y = _qp_sep(draw, y, width)
-        y = _qp_wrap(draw, y, d['closing'], font_text, width, align='center')
-        y = _qp_sep(draw, y, width)
     y = _qp_sep(draw, y, width, 'double')
     return _qp_finish_receipt(img, width, y)
 
