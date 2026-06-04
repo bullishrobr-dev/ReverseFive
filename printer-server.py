@@ -500,18 +500,11 @@ def _qp_draw_shop_footer(draw, y, width, shop, font_small, font_text):
         y = _qp_sep(draw, y, width, 'light')
         for item in items:
             y = _qp_center(draw, y, item, font_small, width)
-    hours = shop.get('hours', {})
+    hours = shop.get('hours', '')
     if hours:
-        days = []
-        day_names = {'mon': 'Mon', 'tue': 'Tue', 'wed': 'Wed', 'thu': 'Thu', 'fri': 'Fri', 'sat': 'Sat', 'sun': 'Sun'}
-        for key, label in day_names.items():
-            if hours.get(key):
-                days.append(f'{label}: {hours[key]}')
-        if days:
-            y = _qp_sep(draw, y, width, 'light')
-            y = _qp_center(draw, y, 'OPENING HOURS', font_small, width)
-            for day in days:
-                y = _qp_center(draw, y, day, font_small, width)
+        y = _qp_sep(draw, y, width, 'light')
+        y = _qp_center(draw, y, 'OPENING HOURS', font_small, width)
+        y = _qp_center(draw, y, str(hours), font_small, width)
     return y
 
 
@@ -536,9 +529,8 @@ def _qp_resolve_placeholders(text, shop, worker):
     locs = shop.get('locations', [])
     loc_text = '\n'.join([f"{(l.get('name') or '')}{(' — ' if l.get('name') and l.get('address') else '')}{(l.get('address') or '')}".strip(' — ') for l in locs])
     text = text.replace('{locations}', loc_text)
-    hours = shop.get('hours', {})
-    hours_text = '\n'.join([f'{k}: {v}' for k, v in hours.items() if v])
-    text = text.replace('{hours}', hours_text)
+    hours = shop.get('hours', '')
+    text = text.replace('{hours}', str(hours))
     return text
 
 
