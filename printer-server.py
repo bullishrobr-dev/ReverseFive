@@ -144,13 +144,13 @@ def build_receipt_image(offer):
     """
     width = PAPER_WIDTH_DOTS
 
-    # --- Load fonts ---
-    font_header = load_font(32, bold=True)
-    font_subheader = load_font(24, bold=True)
-    font_title = load_font(20, bold=True)
-    font_text = load_font(20)
-    font_small = load_font(16)
-    font_large = load_font(28, bold=True)
+    # --- Load fonts (ALL bold for maximum darkness on thermal paper) ---
+    font_header = load_font(36, bold=True)
+    font_subheader = load_font(26, bold=True)
+    font_title = load_font(22, bold=True)
+    font_text = load_font(20, bold=True)
+    font_small = load_font(16, bold=True)
+    font_large = load_font(30, bold=True)
 
     # --- Create a tall canvas for measurement ---
     temp_img = Image.new('RGB', (width, 3000), 'white')
@@ -322,6 +322,16 @@ def build_receipt_image(offer):
 
     # --- Crop to actual content size ---
     receipt = temp_img.crop((0, 0, width, y))
+
+    # --- THRESHOLD: Force pure black/white (no gray anti-aliasing) ---
+    # This is the key step for dark, crisp text on thermal printers.
+    # GDI drivers often dither gray edges, making text look faded.
+    # We boost contrast and threshold so every pixel is 100% black or white.
+    gray = receipt.convert('L')
+    # Any pixel darker than 200/255 becomes pure black; rest becomes pure white
+    bw = gray.point(lambda x: 0 if x < 200 else 255)
+    receipt = bw.convert('RGB')
+
     return receipt
 
 
