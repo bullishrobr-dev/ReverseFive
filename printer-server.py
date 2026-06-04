@@ -348,13 +348,13 @@ def _qp_center(draw, y, text, font, width, color='black'):
     tw, th = _qp_text_size(draw, text, font)
     x = (width - tw) // 2
     draw.text((x, y), text, font=font, fill=color)
-    return y + th
+    return y + th + 8
 
 
 def _qp_left(draw, y, text, font, width, margin=20, color='black'):
     _, th = _qp_text_size(draw, text, font)
     draw.text((margin, y), text, font=font, fill=color)
-    return y + th
+    return y + th + 6
 
 
 def _qp_wrap(draw, y, text, font, width, margin=20, align='left', color='black', spacing=2):
@@ -386,20 +386,20 @@ def _qp_wrap(draw, y, text, font, width, margin=20, align='left', color='black',
             x = margin
         draw.text((x, y), line, font=font, fill=color)
         y += th + spacing
-    return y
+    return y + 6
 
 
 def _qp_sep(draw, y, width, style='single'):
     if style == 'double':
         draw.line([(20, y), (width - 20, y)], fill='black', width=2)
-        draw.line([(20, y + 4), (width - 20, y + 4)], fill='black', width=2)
-        return y + 12
+        draw.line([(20, y + 6), (width - 20, y + 6)], fill='black', width=2)
+        return y + 20
     elif style == 'light':
         draw.line([(20, y), (width - 20, y)], fill='black', width=1)
-        return y + 8
+        return y + 14
     else:
         draw.line([(20, y), (width - 20, y)], fill='black', width=2)
-        return y + 10
+        return y + 16
 
 
 def _qp_load_logo(shop, width):
@@ -438,8 +438,8 @@ def _qp_draw_logo(img, y, shop, width):
     if logo:
         x = (width - logo.width) // 2
         img.paste(logo, (x, y), logo)
-        return y + logo.height + 15
-    return y
+        return y + logo.height + 25
+    return y + 10
 
 
 def _qp_draw_shop_header(draw, y, width, shop, font_header, font_subheader):
