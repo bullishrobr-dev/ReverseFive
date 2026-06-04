@@ -33,25 +33,31 @@ try:
     # ============================================================
     # AUTO-INSTALL DEPENDENCIES
     # ============================================================
-    def ensure_import(module_name, pip_name=None):
-        """Import a module, auto-installing via pip if missing."""
-        if pip_name is None:
-            pip_name = module_name
+    import importlib
+
+    def install_if_missing(pip_name, import_name):
+        """Install package via pip if import fails. Clear cache after install."""
         try:
-            return __import__(module_name)
+            importlib.import_module(import_name)
         except ImportError:
             print(f"[INSTALL] {pip_name} not found. Installing...")
             result = os.system(f'"{sys.executable}" -m pip install "{pip_name}"')
             if result != 0:
                 print(f"[ERROR] Failed to install {pip_name}")
                 sys.exit(1)
-            return __import__(module_name)
+            # Clear stale module cache so fresh import works
+            for key in list(sys.modules.keys()):
+                if key == import_name or key.startswith(import_name + '.'):
+                    del sys.modules[key]
 
-    PIL = ensure_import('PIL', 'pillow')
-    Image = PIL.Image
-    ImageDraw = PIL.ImageDraw
-    ImageFont = PIL.ImageFont
-    qrcode_module = ensure_import('qrcode', 'qrcode[pil]')
+    # Install first, then import fresh
+    install_if_missing('pillow', 'PIL')
+    install_if_missing('qrcode[pil]', 'qrcode')
+
+    Image = importlib.import_module('PIL.Image')
+    ImageDraw = importlib.import_module('PIL.ImageDraw')
+    ImageFont = importlib.import_module('PIL.ImageFont')
+    qrcode_module = importlib.import_module('qrcode')
 
 except Exception as e:
     startup_error = traceback.format_exc()
