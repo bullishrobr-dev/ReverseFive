@@ -44,6 +44,25 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Mobile Safari fallback: hero elements must become visible even if
+   the loading-screen → GSAP trigger race condition occurs */
+@media (prefers-reduced-motion: no-preference) {
+    .hero .eyebrow,
+    .hero .hero-title,
+    .hero .hero-slogan,
+    .hero .hero-description,
+    .hero .hero-cta,
+    .hero .product-float,
+    .hero .price-display,
+    .hero .scroll-indicator {
+        animation: heroRevealFallback 0.6s ease-out 8s forwards;
+    }
+}
+@keyframes heroRevealFallback {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 /* LIGHT THEME */
 body[data-theme="light"] {
     --bg-primary: #faf8f5;

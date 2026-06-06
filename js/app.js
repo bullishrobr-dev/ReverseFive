@@ -14,10 +14,12 @@ function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
         loadingScreen.classList.add('hidden');
-        // Trigger hero animations after loading
-        if (heroTl) heroTl.play();
-        if (typeof animateCollage === 'function') animateCollage();
     }
+    // Always trigger hero animations — don't gate them behind loading screen visibility.
+    // On slow mobile connections, the inline safety fallback may hide the loading screen
+    // before this function runs, which previously caused the hero to stay invisible forever.
+    if (heroTl && heroTl.progress() === 0) heroTl.play();
+    if (typeof animateCollage === 'function') animateCollage();
 }
 
 // Hide after load event + delay, or immediately if already loaded
