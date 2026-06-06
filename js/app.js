@@ -258,14 +258,14 @@ if (hasGSAP) {
 });
 
 heroTl
-    .from('.eyebrow', { opacity: 0, y: 20, duration: 0.8 }, 0.2)
-    .from('.hero-title', { opacity: 0, y: 40, duration: 1 }, 0.4)
-    .from('.hero-slogan', { opacity: 0, y: 30, duration: 0.8 }, 0.6)
-    .from('.hero-description', { opacity: 0, y: 20, duration: 0.8 }, 0.8)
-    .from('.hero-cta', { opacity: 0, y: 20, duration: 0.8 }, 1)
-    .from('.price-display', { opacity: 0, y: 15, duration: 0.6 }, 1.1)
-    .from('.product-float', { opacity: 0, scale: 0.9, duration: 1.2 }, 0.6)
-    .from('.scroll-indicator', { opacity: 0, duration: 1 }, 2.5);
+    .from('.eyebrow', { opacity: 0, y: 20, duration: 0.8, immediateRender: false }, 0.2)
+    .from('.hero-title', { opacity: 0, y: 40, duration: 1, immediateRender: false }, 0.4)
+    .from('.hero-slogan', { opacity: 0, y: 30, duration: 0.8, immediateRender: false }, 0.6)
+    .from('.hero-description', { opacity: 0, y: 20, duration: 0.8, immediateRender: false }, 0.8)
+    .from('.hero-cta', { opacity: 0, y: 20, duration: 0.8, immediateRender: false }, 1)
+    .from('.price-display', { opacity: 0, y: 15, duration: 0.6, immediateRender: false }, 1.1)
+    .from('.product-float', { opacity: 0, scale: 0.9, duration: 1.2, immediateRender: false }, 0.6)
+    .from('.scroll-indicator', { opacity: 0, duration: 1, immediateRender: false }, 2.5);
 
 // Collage photos fall animation
 function animateCollage() {
