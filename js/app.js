@@ -101,8 +101,11 @@ function updateActiveNav() {
 // ============================================
 let lenis = null;
 const hasLenis = () => lenis !== null;
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 try {
-    if (typeof Lenis !== 'undefined') {
+    // Disable Lenis on touch devices — iOS/Android already have native momentum
+    // scrolling, and Lenis conflicts with ScrollTrigger on mobile Safari.
+    if (!isTouchDevice && typeof Lenis !== 'undefined') {
         lenis = new Lenis({
     duration: 1.4,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -305,6 +308,21 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         }, 250);
     });
 
+    // Extra refreshes for mobile Safari — ensures trigger positions are correct
+    // after fonts load, images load, and layout stabilizes
+    if (isTouchDevice) {
+        window.addEventListener('load', function() {
+            setTimeout(function() { ScrollTrigger.refresh(); }, 500);
+            setTimeout(function() { ScrollTrigger.refresh(); }, 1500);
+        });
+        // Also refresh when tab becomes visible (iOS background tab behaviour)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                setTimeout(function() { ScrollTrigger.refresh(); }, 300);
+            }
+        });
+    }
+
     // ── SCROLL PROGRESS BAR ──
     const progressBar = document.createElement('div');
     progressBar.className = 'scroll-progress';
@@ -334,8 +352,9 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         document.querySelectorAll(containerSelector).forEach(grid => {
             const items = grid.querySelectorAll(itemSelector);
             if (!items.length) return;
-            // Immediately set hidden state so no flash
-            gsap.set(items, fromVars);
+            // On desktop: hide first, then reveal on scroll.
+            // On mobile: skip the hide step so content is visible even if ScrollTrigger hiccups.
+            if (!isTouchDevice) gsap.set(items, fromVars);
             gsap.to(items, {
                 opacity: 1, y: 0, x: 0, scale: 1, clipPath: 'inset(0% 0% 0% 0%)',
                 duration: dur || PX_DUR,
@@ -348,7 +367,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 
     // ── SECTION HEADERS ──
     document.querySelectorAll('.section-header').forEach(header => {
-        gsap.set(header, { opacity: 0, y: 50 });
+        if (!isTouchDevice) gsap.set(header, { opacity: 0, y: 50 });
         gsap.to(header, {
             opacity: 1, y: 0, duration: PX_DUR, ease: PX_EASE,
             scrollTrigger: { trigger: header, start: 'top 85%', toggleActions: 'play none none none' }
@@ -365,7 +384,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     revealGrid('.stats-grid', '.stat-card', { opacity: 0, y: 60, scale: 0.88 });
     // Photo gallery clip-path reveals
     document.querySelectorAll('.photo-item').forEach((item, i) => {
-        gsap.set(item, { opacity: 0, clipPath: 'inset(100% 0 0 0)' });
+        if (!isTouchDevice) gsap.set(item, { opacity: 0, clipPath: 'inset(100% 0 0 0)' });
         gsap.to(item, {
             opacity: 1, clipPath: 'inset(0% 0 0 0)', duration: 1.2, ease: PX_EASE,
             scrollTrigger: { trigger: item, start: 'top 88%', toggleActions: 'play none none none' },
@@ -373,31 +392,31 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         });
     });
     // Stats disclaimer
-    gsap.set('.stats-disclaimer-box', { opacity: 0, y: 30 });
+    if (!isTouchDevice) gsap.set('.stats-disclaimer-box', { opacity: 0, y: 30 });
     gsap.to('.stats-disclaimer-box', {
         opacity: 1, y: 0, duration: 0.9, ease: PX_EASE,
         scrollTrigger: { trigger: '.stats-disclaimer-box', start: 'top 90%', toggleActions: 'play none none none' }
     });
 
     // ── HOW IT WORKS: Slide from sides ──
-    gsap.set('.how-left', { opacity: 0, x: -80 });
+    if (!isTouchDevice) gsap.set('.how-left', { opacity: 0, x: -80 });
     gsap.to('.how-left', {
         opacity: 1, x: 0, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.how-left', start: 'top 82%', toggleActions: 'play none none none' }
     });
-    gsap.set('.how-right', { opacity: 0, x: 80 });
+    if (!isTouchDevice) gsap.set('.how-right', { opacity: 0, x: 80 });
     gsap.to('.how-right', {
         opacity: 1, x: 0, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.how-right', start: 'top 82%', toggleActions: 'play none none none' }
     });
 
     // ── WHERE TO APPLY: Clip-path + slide ──
-    gsap.set('.face-photo-wrapper', { opacity: 0, clipPath: 'inset(0 100% 0 0)' });
+    if (!isTouchDevice) gsap.set('.face-photo-wrapper', { opacity: 0, clipPath: 'inset(0 100% 0 0)' });
     gsap.to('.face-photo-wrapper', {
         opacity: 1, clipPath: 'inset(0 0% 0 0)', duration: 1.3, ease: PX_EASE,
         scrollTrigger: { trigger: '.face-photo-wrapper', start: 'top 80%', toggleActions: 'play none none none' }
     });
-    gsap.set('.application-zones', { opacity: 0, x: 60 });
+    if (!isTouchDevice) gsap.set('.application-zones', { opacity: 0, x: 60 });
     gsap.to('.application-zones', {
         opacity: 1, x: 0, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.application-zones', start: 'top 80%', toggleActions: 'play none none none' },
@@ -406,24 +425,24 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 
     // ── PROTOCOL: Steps + Summary ──
     revealGrid('.protocol-steps', '.protocol-step', { opacity: 0, y: 60, scale: 0.88 });
-    gsap.set('.protocol-summary', { opacity: 0, y: 50, scale: 0.95 });
+    if (!isTouchDevice) gsap.set('.protocol-summary', { opacity: 0, y: 50, scale: 0.95 });
     gsap.to('.protocol-summary', {
         opacity: 1, y: 0, scale: 1, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.protocol-summary', start: 'top 85%', toggleActions: 'play none none none' }
     });
 
     // ── IMPORTANT GUIDELINES: Panels slide in ──
-    gsap.set('.guideline-panel.do', { opacity: 0, x: -60 });
+    if (!isTouchDevice) gsap.set('.guideline-panel.do', { opacity: 0, x: -60 });
     gsap.to('.guideline-panel.do', {
         opacity: 1, x: 0, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.guideline-panel.do', start: 'top 82%', toggleActions: 'play none none none' }
     });
-    gsap.set('.guideline-panel.avoid', { opacity: 0, x: 60 });
+    if (!isTouchDevice) gsap.set('.guideline-panel.avoid', { opacity: 0, x: 60 });
     gsap.to('.guideline-panel.avoid', {
         opacity: 1, x: 0, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.guideline-panel.avoid', start: 'top 82%', toggleActions: 'play none none none' }
     });
-    gsap.set('.warning-card', { opacity: 0, y: 40, scale: 0.94 });
+    if (!isTouchDevice) gsap.set('.warning-card', { opacity: 0, y: 40, scale: 0.94 });
     gsap.to('.warning-card', {
         opacity: 1, y: 0, scale: 1, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.warning-card', start: 'top 88%', toggleActions: 'play none none none' }
@@ -436,7 +455,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     revealGrid('.faq-list', '.faq-item', { opacity: 0, y: 40 });
 
     // ── REVIEWS: Summary + Cards ──
-    gsap.set('.reviews-summary', { opacity: 0, y: 30 });
+    if (!isTouchDevice) gsap.set('.reviews-summary', { opacity: 0, y: 30 });
     gsap.to('.reviews-summary', {
         opacity: 1, y: 0, duration: 0.9, ease: PX_EASE,
         scrollTrigger: { trigger: '.reviews-summary', start: 'top 88%', toggleActions: 'play none none none' }
@@ -444,24 +463,24 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     revealGrid('.reviews-grid', '.review-card', { opacity: 0, y: 70, scale: 0.9 });
 
     // ── CONTACT: Slide from sides ──
-    gsap.set('.contact-info', { opacity: 0, x: -60 });
+    if (!isTouchDevice) gsap.set('.contact-info', { opacity: 0, x: -60 });
     gsap.to('.contact-info', {
         opacity: 1, x: 0, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.contact-info', start: 'top 82%', toggleActions: 'play none none none' }
     });
-    gsap.set('.contact-form-wrapper', { opacity: 0, x: 60 });
+    if (!isTouchDevice) gsap.set('.contact-form-wrapper', { opacity: 0, x: 60 });
     gsap.to('.contact-form-wrapper', {
         opacity: 1, x: 0, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.contact-form-wrapper', start: 'top 82%', toggleActions: 'play none none none' }
     });
 
     // ── NEWSLETTER & CTA: Scale up ──
-    gsap.set('.newsletter-content', { opacity: 0, y: 50, scale: 0.94 });
+    if (!isTouchDevice) gsap.set('.newsletter-content', { opacity: 0, y: 50, scale: 0.94 });
     gsap.to('.newsletter-content', {
         opacity: 1, y: 0, scale: 1, duration: PX_DUR, ease: PX_EASE,
         scrollTrigger: { trigger: '.newsletter-content', start: 'top 88%', toggleActions: 'play none none none' }
     });
-    gsap.set('.cta-content', { opacity: 0, y: 60, scale: 0.92 });
+    if (!isTouchDevice) gsap.set('.cta-content', { opacity: 0, y: 60, scale: 0.92 });
     gsap.to('.cta-content', {
         opacity: 1, y: 0, scale: 1, duration: 1.1, ease: PX_EASE,
         scrollTrigger: { trigger: '.cta-content', start: 'top 88%', toggleActions: 'play none none none' }
@@ -5167,16 +5186,25 @@ document.querySelectorAll('.stat-number').forEach(stat => {
     const text = stat.textContent.trim();
     // Skip ranges like "70-90%" or "6-18mo"
     if (text.includes('-')) return;
-    
+
     const match = text.match(/^[\d.]+/);
     if (!match) return;
-    
+
     const target = parseFloat(match[0]);
     const span = stat.querySelector('span');
     const suffix = span ? span.textContent.replace(match[0], '') : text.replace(match[0], '');
-    
+    const finalValue = (target < 1 ? target.toFixed(1) : Math.round(target)) + suffix;
+
+    // On mobile, skip the count-up animation and show the final value immediately.
+    // The animation is a nice visual effect, but showing correct data is essential.
+    if (isTouchDevice) {
+        if (span) span.textContent = finalValue;
+        else stat.textContent = finalValue;
+        return;
+    }
+
     const obj = { val: 0 };
-    
+
     if (typeof gsap !== 'undefined') gsap.to(obj, {
         val: target,
         duration: 2,
@@ -5193,6 +5221,11 @@ document.querySelectorAll('.stat-number').forEach(stat => {
             } else {
                 stat.textContent = v + suffix;
             }
+        },
+        onComplete: () => {
+            // Ensure exact final value is displayed (prevents rounding glitches)
+            if (span) span.textContent = finalValue;
+            else stat.textContent = finalValue;
         }
     });
 });
